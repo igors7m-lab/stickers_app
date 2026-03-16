@@ -1,0 +1,15 @@
+{
+  "name": "Sticker Tool",
+  "short_name": "Stickers",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#00d4ff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1087/1087815.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
