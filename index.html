@@ -147,6 +147,10 @@
 </div>
 
 <script>
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log("Service Worker Registered"));
+    }
     // Логіка JS
     const DeviceTypes = {
         LIGHT:  { label: 'Світло', class: 'type-light' },
