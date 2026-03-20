@@ -35,31 +35,15 @@
             print-color-adjust: exact;
         }
 
-        .shield-wrapper { 
-            max-width: 1150px;
-            margin: 0 auto;
-        }
-
-        .ui-panel { 
-            background: var(--background-primary-alt); 
-            padding: 20px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        .shield-wrapper { max-width: 1150px; margin: 0 auto; }
+        .ui-panel { background: var(--background-primary-alt); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
         table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; border: 1px solid var(--background-modifier-border); background: white; }
         th { padding: 8px; border: 1px solid var(--background-modifier-border); text-align: left; color: var(--text-muted); background: var(--background-secondary); font-size: 0.85em; text-transform: uppercase; }
         td { padding: 0; border: 1px solid var(--background-modifier-border); vertical-align: middle; }
         
-        input, select { 
-            width: 100%; height: 36px; padding: 0 8px; margin: 0;
-            border: none !important; background: transparent !important; color: var(--text-normal); 
-            font-size: 0.95em; outline: none !important; box-sizing: border-box;
-        }
-
+        input, select { width: 100%; height: 36px; padding: 0 8px; margin: 0; border: none !important; background: transparent !important; color: var(--text-normal); font-size: 0.95em; outline: none !important; box-sizing: border-box; }
         .input-calib { border: 1px solid #ccc !important; background: white !important; width: 70px; display: inline-block; text-align: center; }
-
         .mod-idx { font-size: 0.85em; color: var(--text-muted); text-align: center; font-weight: bold; display: block; }
 
         .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
@@ -113,10 +97,8 @@
             .ui-panel { display: none !important; } 
             .shield-wrapper { width: 100%; margin: 0; max-width: none; }
             .din-rail { page-break-inside: avoid; margin-bottom: 5mm; display: flex !important; } 
-            
             body.print-mode-test .print-calibration { display: block; }
             body.print-mode-test #labels-container { display: none !important; }
-            
             body.print-mode-labels .print-calibration { display: none !important; }
             body.print-mode-labels #labels-container { display: block; }
         }
@@ -277,7 +259,6 @@ function saveData() {
 
 function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
     const tr = document.createElement('tr');
-    
     let typeOpts = Object.entries(DeviceTypes).map(([k, v]) => `<option value="${k}" ${type === k ? 'selected' : ''}>${v.label || '—'}</option>`).join('');
     
     if (!DeviceTypes[type] && type !== 'BLANK' && type !== '') {
@@ -328,7 +309,6 @@ document.getElementById('btnProcessImport').onclick = () => {
         let cols = clean.includes('|') ? clean.split('|') : clean.split(/[\t,;]/);
         cols = cols.map(c => c.trim());
         if (cols.length > 0 && (cols[iTag] || cols[iName])) {
-            
             let rawType = cols[iType] ? cols[iType] : '';
             let typeKey = rawType.toUpperCase();
             let finalType = 'BLANK';
@@ -343,7 +323,6 @@ document.getElementById('btnProcessImport').onclick = () => {
                     finalType = matchedKey ? matchedKey : rawType;
                 }
             }
-
             addRow(parseInt(cols[iRow])||1, cols[iTag]||'', cols[iName]||'', finalType, parseInt(cols[iWidth])||1);
         }
     });
@@ -376,7 +355,6 @@ document.getElementById('btnGen').onclick = () => {
                 used = 0;
             }
             const label = document.createElement('div'); label.className = `label w-${item.p}`;
-            
             const tInfo = DeviceTypes[item.type];
             const barClass = tInfo ? tInfo.class : 'type-blank';
             const barLabel = tInfo ? tInfo.label : item.type; 
@@ -394,28 +372,42 @@ document.getElementById('btnGen').onclick = () => {
 document.getElementById('btnAdd').onclick = () => addRow();
 document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
 
-// НОВА НАДІЙНА ЛОГІКА ДРУКУ: використовуємо події браузера
-
+// --- БРОНЕБІЙНА ЛОГІКА ДРУКУ ДЛЯ SAFARI І CHROME ---
 let currentPrintMode = '';
 
-// Коли браузер ЗАКРИВАЄ вікно друку (незалежно від того, надрукували чи скасували)
-window.addEventListener('afterprint', () => {
+function clearPrintMode() {
     if (currentPrintMode) {
         document.body.classList.remove(currentPrintMode);
         currentPrintMode = '';
     }
-});
+}
+
+// 1. Стандартний обробник (Chrome, Firefox, сучасний Edge)
+window.addEventListener('afterprint', clearPrintMode);
+
+// 2. Бронебійний обробник для Safari (через matchMedia)
+const mediaQueryList = window.matchMedia('print');
+if (mediaQueryList.addEventListener) {
+    mediaQueryList.addEventListener('change', function(mql) {
+        if (!mql.matches) clearPrintMode();
+    });
+} else if (mediaQueryList.addListener) { // Старі версії Safari
+    mediaQueryList.addListener(function(mql) {
+        if (!mql.matches) clearPrintMode();
+    });
+}
 
 btnPrintTest.onclick = () => { 
     currentPrintMode = 'print-mode-test';
     document.body.classList.add(currentPrintMode); 
-    window.print(); 
+    // Мікрозатримка дає Safari час намалювати CSS перед блокуванням вікна
+    setTimeout(() => window.print(), 100); 
 };
 
 btnPrint.onclick = () => { 
     currentPrintMode = 'print-mode-labels';
     document.body.classList.add(currentPrintMode); 
-    window.print(); 
+    setTimeout(() => window.print(), 100); 
 };
 
 const savedData = localStorage.getItem('shield_v2_data');
