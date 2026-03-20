@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор маркування щита PRO (Автокалібрування)</title>
+    <title>Конструктор маркування щита</title>
     <style>
         :root {
             --background-primary: #ffffff;
@@ -126,7 +126,7 @@
     <div class="ui-panel">
         <div>
             <h3 style="margin-top: 0; display: inline-block;">⚡️ Конструктор маркування</h3>
-            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт</button>
+            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт даних</button>
             <button class="btn btn-export" id="btnExport">📤 Експорт у CSV</button>
         </div>
         
@@ -156,18 +156,18 @@
                 </select>
             </div>
             <div>
-                <strong>Бажана ширина (мм):</strong>
+                <strong>Ширина (мм):</strong>
                 <input type="number" step="0.1" id="realWidth" class="input-calib" value="17.9" title="Скільки міліметрів ви хочете отримати на папері">
             </div>
             <div>
-                <strong>Бажана висота (мм):</strong>
+                <strong>Висота (мм):</strong>
                 <input type="number" step="0.1" id="realHeight" class="input-calib" value="30">
             </div>
         </div>
 
         <div class="calibration-box">
             <div style="flex: 1;">
-                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте лінію. Якщо вона НЕ 100 мм, впишіть її реальний розмір тут ➔
+                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте тестову лінію. Якщо вона НЕ 100 мм, впишіть її реальний розмір тут ➔
             </div>
             <div>
                 <input type="number" step="0.1" id="measuredLine" class="input-calib" value="100" style="width: 70px; font-weight: bold; background: #fff3e0 !important;"> мм
@@ -193,7 +193,7 @@
             <tbody id="tableBody"></tbody>
         </table>
         
-        <button class="btn btn-add" id="btnAdd">+ Додати лінію</button>
+        <button class="btn btn-add" id="btnAdd">+ Додати ряд</button>
         <button class="btn btn-gen" id="btnGen">Сформувати наклейки</button>
         <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати наклейки</button>
     </div>
@@ -219,8 +219,8 @@ const DeviceTypes = {
     CLIMATE: { label: 'Клімат', class: 'type-climate' },
     SECURITY: { label: 'Охорона', class: 'type-security' },
     SMART:   { label: 'Smart Home', class: 'type-smart' },
-    POWER:     { label: 'Живлення', class: 'type-power' },
-    APPL:    { label: 'Техніка', class: 'type-appliances' }
+    POWER:  { label: 'Живлення', class: 'type-power' },
+    APPL:   { label: 'Техніка', class: 'type-appliances' }
 };
 
 const tableBody = document.getElementById('tableBody');
@@ -397,8 +397,18 @@ document.getElementById('btnGen').onclick = () => {
 document.getElementById('btnAdd').onclick = () => addRow();
 document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
 
-btnPrintTest.onclick = () => { document.body.classList.add('print-mode-test'); window.print(); document.body.classList.remove('print-mode-test'); };
-btnPrint.onclick = () => { document.body.classList.add('print-mode-labels'); window.print(); document.body.classList.remove('print-mode-labels'); };
+// ВИПРАВЛЕНА ЛОГІКА ДРУКУ: використовуємо setTimeout, щоб браузер встиг сформувати вікно
+btnPrintTest.onclick = () => { 
+    document.body.classList.add('print-mode-test'); 
+    window.print(); 
+    setTimeout(() => { document.body.classList.remove('print-mode-test'); }, 1000); 
+};
+
+btnPrint.onclick = () => { 
+    document.body.classList.add('print-mode-labels'); 
+    window.print(); 
+    setTimeout(() => { document.body.classList.remove('print-mode-labels'); }, 1000); 
+};
 
 const savedData = localStorage.getItem('shield_v2_data');
 if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввідний рубильник', 'HEAVY', 3);
