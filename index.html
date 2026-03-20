@@ -3,157 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор щита v2.2 (Масштабна корекція)</title>
+    <title>Конструктор маркування щита</title>
     <style>
         :root {
-            /* МАТЕМАТИЧНА КОРЕКЦІЯ:
-               Оскільки ваш принтер видає 23см замість 21.5см, 
-               ми зменшуємо базову ширину модуля на ~7%.
-               Було 17.91mm -> Стало 16.74mm
-            */
-            --unit-w: 16.74mm; 
+            --background-primary: #ffffff;
+            --background-primary-alt: #f5f5f5;
+            --background-secondary: #e5e5e5;
+            --background-modifier-border: #ddd;
+            --text-normal: #333;
+            --text-muted: #666;
+            
+            /* Змінні для точного калібрування розмірів */
+            --unit-w: 16.7mm; 
+            --unit-h: 30mm;
         }
 
         @page {
-            size: A4 portrait;
-            margin: 0; /* Прибираємо системні поля */
+            size: A4 landscape; 
+            margin: 0;
         }
 
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
             margin: 20px;
+            color: var(--text-normal);
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        /* ПАНЕЛЬ КЕРУВАННЯ (не друкується) */
+        .shield-wrapper { 
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
         .ui-panel { 
-            background: #f5f5f5; 
+            background: var(--background-primary-alt); 
             padding: 20px; 
             border-radius: 8px; 
             margin-bottom: 20px; 
-            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 10px; }
-        th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }
-        input, select { width: 100%; border: none; height: 30px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; border: 1px solid var(--background-modifier-border); background: white; }
+        th { padding: 8px; border: 1px solid var(--background-modifier-border); text-align: left; color: var(--text-muted); background: var(--background-secondary); font-size: 0.85em; text-transform: uppercase; }
+        td { padding: 0; border: 1px solid var(--background-modifier-border); vertical-align: middle; }
+        
+        input, select { 
+            width: 100%; height: 36px; padding: 0 8px; margin: 0;
+            border: none !important; background: transparent !important; color: var(--text-normal); 
+            font-size: 0.95em; outline: none !important; box-sizing: border-box;
+        }
 
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-gen { background: #007bff; color: white; width: 100%; margin-top: 10px; }
+        .input-calib {
+            border: 1px solid #ccc !important;
+            background: white !important;
+            width: 70px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .mod-idx {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            text-align: center;
+            font-weight: bold;
+            display: block;
+        }
+
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-gen { background: #007bff; color: white; width: 100%; margin-top: 15px; font-size: 1.1em; }
         .btn-print { background: #6c757d; color: white; margin-top: 10px; display: none; }
+        .btn-import { background: #17a2b8; color: white; float: right; }
+        .btn-del { background: transparent; color: #dc3545; width: 100%; border: none; cursor: pointer; font-size: 1.1em; }
+        .btn-clear { background: transparent; color: #f44336; float: right; text-decoration: underline; cursor: pointer; border: none; margin-left: 10px; }
 
-        /* ОБЛАСТЬ ДРУКУ */
-        #print-area {
-            background: white;
-            padding: 10mm; /* Внутрішній відступ на папері */
+        #import-panel { display: none; background: #fff; border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        #import-panel textarea { width: 100%; height: 100px; font-family: monospace; padding: 10px; box-sizing: border-box; margin-bottom: 10px; }
+
+        .settings-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 6px;
+            flex-wrap: wrap;
         }
 
         .din-rail { 
-            display: flex !important; 
-            flex-direction: row !important;
-            flex-wrap: nowrap !important; 
-            border: 0.1mm dashed #000; 
-            width: fit-content; 
-            margin-bottom: 5mm;
-            background: white;
+            display: flex; 
+            flex-wrap: nowrap; 
+            border: 0.1mm solid #000; 
+            background: white; 
+            margin-bottom: 5mm; 
+            width: max-content;
         }
-
+        
         .label { 
             box-sizing: border-box; 
-            border-right: 0.1mm dashed #000; 
-            height: 30mm; 
+            border-right: 0.1mm solid #000; 
+            height: var(--unit-h); 
+            position: relative; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             text-align: center; 
-            position: relative;
-            flex-shrink: 0; /* Забороняємо браузеру змінювати ширину */
+            background: white; 
+            color: black; 
             overflow: hidden;
+            flex-shrink: 0; 
         }
+        .label:last-child { border-right: none; }
         
-        .w-1 { width: var(--unit-w); } 
-        .w-2 { width: calc(var(--unit-w) * 2); } 
-        .w-3 { width: calc(var(--unit-w) * 3); } 
-        .w-4 { width: calc(var(--unit-w) * 4); }
-
-        .t-bar { width: 100%; height: 5.5mm; border-bottom: 0.1mm solid #000; font-size: 7pt; font-weight: bold; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
-        .l-tag { position: absolute; top: 6mm; left: 1.5mm; font-size: 6.5pt; font-weight: bold; }
-        .l-name { font-weight: bold; font-size: 8pt; margin-top: 10mm; padding: 0 1mm; line-height: 1.1; }
+        .w-1 { width: var(--unit-w); min-width: var(--unit-w); max-width: var(--unit-w); } 
+        .w-2 { width: calc(var(--unit-w) * 2); min-width: calc(var(--unit-w) * 2); max-width: calc(var(--unit-w) * 2); } 
+        .w-3 { width: calc(var(--unit-w) * 3); min-width: calc(var(--unit-w) * 3); max-width: calc(var(--unit-w) * 3); } 
+        .w-4 { width: calc(var(--unit-w) * 4); min-width: calc(var(--unit-w) * 4); max-width: calc(var(--unit-w) * 4); }
+        
+        .t-bar { position: absolute; top: 0; left: 0; width: 100%; height: 5.5mm; border-bottom: 0.1mm solid #000; display: flex; align-items: center; justify-content: center; font-size: 7pt; font-weight: bold; text-transform: uppercase; box-sizing: border-box; }
+        .l-tag { position: absolute; top: 6mm; left: 1.5mm; font-size: 6.5pt; font-weight: bold; color: #444; }
+        .l-name { font-weight: bold; font-size: 8pt; margin-top: 10mm; width: 100%; line-height: 1.1; padding: 0 1mm; box-sizing: border-box; }
         .l-num { position: absolute; bottom: 0.5mm; right: 1mm; font-size: 7pt; color: #888; }
 
-        /* Кольори */
-        .type-blank { background: #eee; }
+        .type-blank { background: transparent; }
         .type-light { background: #fff176; } 
         .type-socket { background: #81c784; } 
-        .type-heavy { background: #e57373; }
+        .type-heavy { background: #e57373; } 
+        .type-rccb { background: #64b5f6; } 
+        .type-gen { background: #ffb74d; } 
+        .type-net { background: #455a64; color: #fff; }
+	    .type-climate { background: #65edff; } /* Клімат */
+        .type-smart { background: #4db6ac; color: #fff; } /* Розумний дім */
+        .type-other { background: #f0f7e8; } /* інші */
+        .type-appliances { background: #7986cb; color: #fff; } /* Техніка */
 
-        @media print {
-            .ui-panel { display: none !important; }
-            body { margin: 0; padding: 0; }
-            #print-area { padding: 10mm 0 0 10mm; } /* Позиціонування на аркуші */
+        @media print { 
+            body { background: white; margin: 0; padding: 10mm; } 
+            .ui-panel { display: none !important; } 
+            .shield-wrapper { width: 100%; margin: 0; max-width: none; }
+            .din-rail { page-break-inside: avoid; margin-bottom: 5mm; display: flex !important; } 
         }
     </style>
 </head>
 <body>
 
-<div class="ui-panel">
-    <h3>⚡️ Налаштування масштабу (Поточна ширина модуля: 16.74мм)</h3>
-    <table id="dataTable">
-        <thead>
-            <tr><th>Ряд</th><th>Позначка</th><th>Назва</th><th>Тип</th><th>Ширина</th><th></th></tr>
-        </thead>
-        <tbody id="tBody"></tbody>
-    </table>
-    <button class="btn" style="background:#28a745; color:white;" onclick="addRow()">+ Додати лінію</button>
-    <button class="btn btn-gen" onclick="generate()">Сформувати наклейки</button>
-    <button class="btn btn-print" id="btnPrint" onclick="window.print()">🖨 РОЗДРУКУВАТИ</button>
-    <p style="color:red; font-size: 0.85em; margin-top:10px;">
-        УВАГА: У вікні друку виберіть <b>Масштаб: 100%</b> та <b>Поля: Відсутні (None)</b>.
-    </p>
+<div class="shield-wrapper">
+    <div class="ui-panel">
+        <button class="btn-clear" id="btnClear">Очистити все</button>
+        <button class="btn btn-import" id="btnToggleImport">📥 Імпорт даних</button>
+        
+        <h3 style="margin-top: 0;">⚡️ Конструктор маркування</h3>
+        
+        <div id="import-panel">
+    <div style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">
+        <strong>Порядок колонок (CSV або Markdown):</strong><br>
+        Позначка | Назва лінії | Ширина (мод.) | Тип (напр. LIGHT) | Номер ряду
+    </div>
+    <textarea id="importText" placeholder="Вставте ваш список сюди..."></textarea>
+    <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити</button>
 </div>
 
-<div id="print-area"></div>
+        <div class="settings-row">
+            <div>
+                Модулів на рейку:
+                <select id="railLimit" style="width: auto; border: 1px solid #ccc !important; height: auto; padding: 2px;">
+                    <option value="12" selected>12</option>
+                    <option value="18">18</option>
+                    <option value="24">24</option>
+                </select>
+            </div>
+            <div>
+                <strong>Ширина 1 мод. (мм):</strong>
+                <input type="number" step="0.1" id="calibWidth" class="input-calib" value="16.7">
+            </div>
+            <div>
+                <strong>Висота ряду (мм):</strong>
+                <input type="number" step="0.1" id="calibHeight" class="input-calib" value="30">
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px; text-align: center;" title="Порядковий номер модуля">#</th>
+                    <th style="width: 60px; text-align: center;">Ряд</th>
+                    <th style="width: 80px;">Поз.</th>
+                    <th>Назва лінії</th>
+                    <th style="width: 120px;">Тип</th>
+                    <th style="width: 60px; text-align: center;">Шир.</th>
+                    <th style="width: 40px;"></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        
+        <button class="btn btn-add" id="btnAdd">+ Додати лінію</button>
+        <button class="btn btn-gen" id="btnGen">Сформувати наклейки</button>
+        <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати</button>
+    </div>
+    
+    <div id="print-area"></div>
+</div>
 
 <script>
 const DeviceTypes = {
     BLANK:  { label: '', class: 'type-blank' },
     LIGHT:  { label: 'Світло', class: 'type-light' },
     SOCKET: { label: 'Розетки', class: 'type-socket' },
-    HEAVY:  { label: 'Силове', class: 'type-heavy' }
+    HEAVY:  { label: 'Живлення', class: 'type-heavy' },
+    RCCB:   { label: 'ПЗВ/ Диф', class: 'type-rccb' },
+    GEN:    { label: 'Генератор', class: 'type-gen' },
+    NET:    { label: 'Iнтернет', class: 'type-net' },
+    CLIMATE: { label: 'Клімат', class: 'type-climate' },
+    SMART:   { label: 'Smart Home', class: 'type-smart' },
+    UPS:     { label: 'Інше', class: 'type-other' },
+    APPL:    { label: 'Техніка', class: 'type-appliances' }
+
 };
 
-function addRow(r=1, tag='', name='', type='BLANK', p=1) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="number" class="r-row" value="${r}" style="width:40px"></td>
-        <td><input type="text" class="r-tag" value="${tag}" placeholder="QF1"></td>
-        <td><input type="text" class="r-name" value="${name}" placeholder="Назва..."></td>
-        <td><select class="r-type">${Object.entries(DeviceTypes).map(([k,v])=>`<option value="${k}" ${type===k?'selected':''}>${v.label || '—'}</option>`).join('')}</select></td>
-        <td><select class="r-p">${[1,2,3,4].map(v=>`<option value="${v}" ${p==v?'selected':''}>${v}</option>`).join('')}</select></td>
-        <td><button onclick="this.parentElement.parentElement.remove()">✕</button></td>
-    `;
-    document.getElementById('tBody').appendChild(tr);
+const tableBody = document.getElementById('tableBody');
+const railLimit = document.getElementById('railLimit');
+const calibWidth = document.getElementById('calibWidth');
+const calibHeight = document.getElementById('calibHeight');
+const printArea = document.getElementById('print-area');
+const btnPrint = document.getElementById('btnPrint');
+
+// Завантаження калібрувань
+const savedWidth = localStorage.getItem('shield_v2_width') || '16.7';
+const savedHeight = localStorage.getItem('shield_v2_height') || '30';
+
+calibWidth.value = savedWidth;
+calibHeight.value = savedHeight;
+document.documentElement.style.setProperty('--unit-w', savedWidth + 'mm');
+document.documentElement.style.setProperty('--unit-h', savedHeight + 'mm');
+
+calibWidth.addEventListener('input', function() {
+    document.documentElement.style.setProperty('--unit-w', this.value + 'mm');
+    localStorage.setItem('shield_v2_width', this.value);
+});
+
+calibHeight.addEventListener('input', function() {
+    document.documentElement.style.setProperty('--unit-h', this.value + 'mm');
+    localStorage.setItem('shield_v2_height', this.value);
+});
+
+// Функція оновлення нумерації модулів у таблиці
+function updateIndices() {
+    let currentMod = 1;
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+        let p = parseInt(tr.querySelector('.row-phases').value) || 1;
+        let idxText = p > 1 ? `${currentMod}-${currentMod + p - 1}` : currentMod;
+        tr.querySelector('.mod-idx').innerText = idxText;
+        currentMod += p;
+    });
 }
 
-function generate() {
-    const limit = 12; // Модулів на рейку
-    const area = document.getElementById('print-area');
-    area.innerHTML = '';
-    document.getElementById('btnPrint').style.display = 'block';
-
-    const rows = Array.from(document.querySelectorAll('#tBody tr')).map(tr => ({
-        r: tr.querySelector('.r-row').value,
-        tag: tr.querySelector('.r-tag').value,
-        name: tr.querySelector('.r-name').value,
-        type: tr.querySelector('.r-type').value,
-        p: parseInt(tr.querySelector('.r-p').value)
+function saveData() {
+    updateIndices(); // Оновлюємо нумерацію перед збереженням
+    const rows = document.querySelectorAll('#tableBody tr');
+    const data = Array.from(rows).map(row => ({
+        r: row.querySelector('.row-num').value,
+        tag: row.querySelector('.row-tag').value,
+        n: row.querySelector('.row-name').value,
+        t: row.querySelector('.row-type').value,
+        p: row.querySelector('.row-phases').value
     }));
+    localStorage.setItem('shield_v2_data', JSON.stringify(data));
+}
+
+function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
+    const tr = document.createElement('tr');
+    let typeOpts = Object.entries(DeviceTypes).map(([k, v]) => `<option value="${k}" ${type === k ? 'selected' : ''}>${v.label || '—'}</option>`).join('');
+    let rowOpts = Array.from({length: 15}, (_, i) => `<option value="${i+1}" ${parseInt(rNum) === i+1 ? 'selected' : ''}>${i+1}</option>`).join('');
+
+    tr.innerHTML = `
+        <td><span class="mod-idx"></span></td>
+        <td><select class="row-num">${rowOpts}</select></td>
+        <td><input type="text" class="row-tag" value="${tag}" placeholder="QF1"></td>
+        <td><input type="text" class="row-name" value="${name}" placeholder="Назва..."></td>
+        <td><select class="row-type">${typeOpts}</select></td>
+        <td><select class="row-phases">${[1,2,3,4].map(v => `<option value="${v}" ${phases == v ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+        <td><button class="btn-del" title="Видалити">✕</button></td>
+    `;
+
+    tr.querySelectorAll('input, select').forEach(el => el.addEventListener('change', saveData));
+    tr.querySelector('.btn-del').onclick = () => { tr.remove(); saveData(); };
+    tableBody.appendChild(tr);
+    saveData();
+}
+
+document.getElementById('btnToggleImport').onclick = () => {
+    const p = document.getElementById('import-panel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+};
+
+document.getElementById('btnProcessImport').onclick = () => {
+    const text = document.getElementById('importText').value.trim();
+    text.split('\n').forEach(line => {
+        let cols = line.includes('|') ? line.split('|').map(c=>c.trim()).filter(c=>c!=='') : line.split(',').map(c=>c.trim());
+        if (cols.length >= 2) {
+            addRow(cols[4]||1, cols[0], cols[1], cols[3]||'BLANK', parseInt(cols[2])||1);
+        }
+    });
+    document.getElementById('import-panel').style.display = 'none';
+};
+
+document.getElementById('btnGen').onclick = () => {
+    const limit = parseInt(railLimit.value);
+    const rows = Array.from(document.querySelectorAll('#tableBody tr')).map(tr => ({
+        r: tr.querySelector('.row-num').value,
+        tag: tr.querySelector('.row-tag').value,
+        name: tr.querySelector('.row-name').value,
+        type: tr.querySelector('.row-type').value,
+        p: parseInt(tr.querySelector('.row-phases').value)
+    }));
+
+    printArea.innerHTML = '';
+    btnPrint.style.display = 'inline-block';
 
     const grouped = {};
     rows.forEach(item => { if(!grouped[item.r]) grouped[item.r] = []; grouped[item.r].push(item); });
 
-    let gIdx = 1;
+    let globalIdx = 1;
     Object.keys(grouped).sort((a,b)=>a-b).forEach(rNum => {
         let rail = document.createElement('div');
         rail.className = 'din-rail';
@@ -161,28 +335,33 @@ function generate() {
 
         grouped[rNum].forEach(item => {
             if (used + item.p > limit) {
-                area.appendChild(rail);
+                printArea.appendChild(rail);
                 rail = document.createElement('div'); rail.className = 'din-rail';
                 used = 0;
             }
             const label = document.createElement('div');
             label.className = `label w-${item.p}`;
-            const t = DeviceTypes[item.type];
-            label.innerHTML = `
-                <div class="t-bar ${t.class}">${t.label}</div>
-                <div class="l-tag">${item.tag}</div>
-                <div class="l-name">${item.name}</div>
-                <div class="l-num">${item.p > 1 ? gIdx+'-'+(gIdx+item.p-1) : gIdx}</div>
-            `;
+            const tInfo = DeviceTypes[item.type];
+            label.innerHTML = `<div class="t-bar ${tInfo.class}">${tInfo.label}</div>
+                <div class="l-tag">${item.tag}</div><div class="l-name">${item.name}</div>
+                <div class="l-num">${item.p > 1 ? globalIdx+'-'+(globalIdx+item.p-1) : globalIdx}</div>`;
             rail.appendChild(label);
-            used += item.p; gIdx += item.p;
+            used += item.p; globalIdx += item.p;
         });
-        area.appendChild(rail);
+        printArea.appendChild(rail);
     });
-}
+};
 
-// Початковий рядок
-addRow(1, 'QS1', 'Ввідний', 'HEAVY', 3);
+document.getElementById('btnAdd').onclick = () => addRow();
+document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все? Дані будуть втрачені.')) { tableBody.innerHTML = ''; localStorage.clear(); updateIndices(); } };
+btnPrint.onclick = () => window.print();
+
+const savedData = localStorage.getItem('shield_v2_data');
+if (savedData) {
+    JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p));
+} else {
+    addRow(1, 'QS1', 'Ввідний', 'HEAVY', 3);
+}
 </script>
 </body>
 </html>
