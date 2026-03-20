@@ -13,6 +13,8 @@
             --background-modifier-active-hover: #ececec;
             --text-normal: #333;
             --text-muted: #666;
+            /* 215mm / 12 = 17.9166mm для точної відповідності рейці */
+            --unit-w: 17.9166mm; 
         }
 
         body {
@@ -23,8 +25,7 @@
         }
 
         .shield-wrapper { 
-            --unit-w: calc(215mm / 12); 
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -89,10 +90,10 @@
         .type-net { background: #455a64 !important; color: #fff !important; }
 
         @media print { 
-            body { background: white; margin: 0; }
+            body { background: white; margin: 0; padding: 0; }
             .ui-panel { display: none !important; } 
-            .shield-wrapper { width: 100%; }
-            .din-rail { page-break-inside: avoid; margin-bottom: 2mm; } 
+            .shield-wrapper { width: 100%; margin: 0; }
+            .din-rail { page-break-inside: avoid; margin-bottom: 2mm; border: 0.1mm dashed #ccc; } 
         }
     </style>
 </head>
@@ -101,24 +102,24 @@
 <div class="shield-wrapper" id="mainContainer">
     <div class="ui-panel">
         <button class="btn-clear" id="btnClear">Очистити все</button>
-        <button class="btn btn-import" id="btnToggleImport">📥 Вставити Markdown</button>
+        <button class="btn btn-import" id="btnToggleImport">📥 Імпорт Markdown / CSV</button>
         
         <h3 style="margin-top: 0; margin-bottom: 10px;">⚡️ Конструктор щита</h3>
         
         <div id="import-panel">
             <div style="font-size: 0.85em; margin-bottom: 5px; color: var(--text-muted);">
-                Скопіюйте сюди вашу таблицю в форматі Markdown (|).
+                Підтримується Markdown (|) або CSV (,). Формат: №, Позначка, Назва, Ширина, Тип, Ряд
             </div>
-            <textarea id="importText" placeholder="| № | Познач | Назва | Шир | Тип | Ряд |"></textarea>
-            <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити таблицю</button>
+            <textarea id="importText" placeholder="Приклад CSV: 1, QF1, Світло кухня, 1, LIGHT, 1"></textarea>
+            <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити дані</button>
         </div>
 
         <div style="margin-bottom: 15px; font-size: 0.9em;">
             <label>Модулів на рейку:
                 <select id="railLimit" style="width: auto; display: inline-block; padding: 4px; border: 1px solid #ccc !important; border-radius: 4px !important; height: auto;">
-                    <option value="12" selected>12</option>
-                    <option value="18">18</option>
-                    <option value="24">24</option>
+                    <option value="12" selected>12 (215мм)</option>
+                    <option value="18">18 (322мм)</option>
+                    <option value="24">24 (430мм)</option>
                 </select>
             </label>
         </div>
@@ -147,6 +148,7 @@
 
 <script>
 const DeviceTypes = {
+    BLANK:  { label: '', class: 'type-blank' }, // Пустий за замовчуванням
     LIGHT:  { label: 'Світло', class: 'type-light' },
     SOCKET: { label: 'Розетки', class: 'type-socket' },
     HEAVY:  { label: 'Силове', class: 'type-heavy' },
@@ -154,8 +156,7 @@ const DeviceTypes = {
     GEN:    { label: 'Генератор', class: 'type-gen' },
     SEC:    { label: 'Безпека', class: 'type-sec' },
     NET:    { label: 'IT', class: 'type-net' },
-    CLIMAT: { label: 'Клімат', class: 'type-climat' },
-    BLANK:  { label: 'Резерв', class: 'type-blank' }
+    CLIMAT: { label: 'Клімат', class: 'type-climat' }
 };
 
 const tableBody = document.getElementById('tableBody');
@@ -197,14 +198,14 @@ function saveData() {
     localStorage.setItem('shield_limit', railLimit.value);
 }
 
-function addRow(rNum = 1, tag = '', name = '', type = 'LIGHT', phases = 1) {
+function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
     const tr = document.createElement('tr');
     
     let typeOptions = Object.entries(DeviceTypes).map(([key, value]) => 
-        `<option value="${key}" ${type === key ? 'selected' : ''}>${value.label}</option>`
+        `<option value="${key}" ${type === key ? 'selected' : ''}>${value.label || '—'}</option>`
     ).join('');
 
-    let rowOptions = Array.from({length: 15}, (_, i) => i + 1).map(i => 
+    let rowOptions = Array.from({length: 20}, (_, i) => i + 1).map(i => 
         `<option value="${i}" ${parseInt(rNum) === i ? 'selected' : ''}>${i}</option>`
     ).join('');
 
@@ -252,7 +253,6 @@ function addRow(rNum = 1, tag = '', name = '', type = 'LIGHT', phases = 1) {
     saveData();
 }
 
-// Ініціалізація кнопок
 document.getElementById('btnToggleImport').onclick = () => {
     const panel = document.getElementById('import-panel');
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
@@ -260,7 +260,7 @@ document.getElementById('btnToggleImport').onclick = () => {
 
 document.getElementById('btnAdd').onclick = () => {
     const rows = document.querySelectorAll('#tableBody tr');
-    let targetRow = 1, nextTag = '', nextType = 'LIGHT', nextPhases = 1;
+    let targetRow = 1, nextTag = '', nextType = 'BLANK', nextPhases = 1;
 
     if(rows.length > 0) {
         const last = rows[rows.length - 1];
@@ -328,10 +328,29 @@ document.getElementById('btnProcessImport').onclick = () => {
     if (!text) return;
     const lines = text.split('\n');
     lines.forEach(line => {
-        if (!line.includes('|')) return;
-        const cols = line.split('|').map(c => c.trim());
-        if (cols.length >= 4 && !line.includes('---') && !line.toLowerCase().includes('назва')) {
-            addRow(cols[6] || 1, cols[2], cols[3], 'LIGHT', parseInt(cols[4]) || 1);
+        let cols = [];
+        if (line.includes('|')) {
+            cols = line.split('|').map(c => c.trim());
+            // Видаляємо порожні елементи з країв Markdown рядка
+            if (cols[0] === '') cols.shift();
+        } else if (line.includes(',')) {
+            cols = line.split(',').map(c => c.trim());
+        } else {
+            return;
+        }
+
+        if (cols.length >= 3 && !line.includes('---') && !line.toLowerCase().includes('назва')) {
+            // Формат за замовчуванням (№, Позначка, Назва, Ширина, Тип, Ряд)
+            // Markdown: | 1 | QF1 | Назва | 1 | LIGHT | 1 |
+            // CSV: 1, QF1, Назва, 1, LIGHT, 1
+            
+            const tag = cols[1] || '';
+            const name = cols[2] || '';
+            const width = parseInt(cols[3]) || 1;
+            const type = cols[4] && DeviceTypes[cols[4]] ? cols[4] : 'BLANK';
+            const row = parseInt(cols[5]) || 1;
+
+            addRow(row, tag, name, type, width);
         }
     });
     document.getElementById('importText').value = '';
