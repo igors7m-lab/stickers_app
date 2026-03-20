@@ -5,35 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конструктор маркування щита</title>
     <style>
-        :root { 
-            --unit-w: calc(215mm / 12); 
-            --text-normal: #333333;
-            --text-muted: #666666;
+        :root {
             --background-primary: #ffffff;
-            --background-primary-alt: #fdfdfd;
-            --background-secondary: #f4f5f7;
-            --background-modifier-border: #d0d0d0;
-            --background-modifier-active-hover: #e8f0fe;
+            --background-primary-alt: #f5f5f5;
+            --background-secondary: #e5e5e5;
+            --background-modifier-border: #ddd;
+            --background-modifier-active-hover: #ececec;
+            --text-normal: #333;
+            --text-muted: #666;
         }
 
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #e9ecef;
-            margin: 0;
-            padding: 20px;
+            background-color: #f0f2f5;
+            margin: 20px;
             color: var(--text-normal);
         }
 
-        .shield-wrapper { max-width: 1000px; margin: 0 auto; }
+        .shield-wrapper { 
+            --unit-w: calc(215mm / 12); 
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .shield-wrapper .ui-panel { 
+            background: var(--background-primary-alt); 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         
-        .shield-wrapper .ui-panel { background: var(--background-primary-alt); padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        
-        .shield-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; border: 1px solid var(--background-modifier-border); background: var(--background-primary); }
-        .shield-wrapper th { padding: 8px 8px; border: 1px solid var(--background-modifier-border); text-align: left; color: var(--text-muted); background: var(--background-secondary); font-size: 0.85em; text-transform: uppercase; }
+        .shield-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; border: 1px solid var(--background-modifier-border); background: white; }
+        .shield-wrapper th { padding: 8px; border: 1px solid var(--background-modifier-border); text-align: left; color: var(--text-muted); background: var(--background-secondary); font-size: 0.85em; text-transform: uppercase; }
         .shield-wrapper td { padding: 0; border: 1px solid var(--background-modifier-border); vertical-align: middle; position: relative; }
         
         .shield-wrapper input, .shield-wrapper select { 
-            width: 100%; height: 34px; padding: 0 8px; margin: 0;
+            width: 100%; height: 36px; padding: 0 8px; margin: 0;
             border: none !important; border-radius: 0 !important; 
             background: transparent !important; color: var(--text-normal); 
             font-size: 0.95em; box-shadow: none !important; outline: none !important;
@@ -42,388 +50,307 @@
         .shield-wrapper input[type="text"] { cursor: text; }
         .shield-wrapper input:focus, .shield-wrapper select:focus { background: var(--background-modifier-active-hover) !important; }
         
-        .shield-wrapper .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
-        .shield-wrapper .btn-add { background: #28a745; color: white; padding: 8px 15px; font-size: 0.95em; }
-        .shield-wrapper .btn-gen { background: #007bff; color: white; width: 100%; margin-top: 15px; font-size: 1.05em; }
-        .shield-wrapper .btn-print { background: #6c757d; color: white; margin-top: 15px; display: none; font-size: 1.05em; }
-        
-        .shield-wrapper .btn-import { background: #17a2b8; color: white; padding: 6px 12px; font-size: 0.9em; float: right; margin-right: 10px; margin-top: -5px; }
-        
-        .shield-wrapper .btn-del { background: transparent; color: #dc3545; width: 100%; height: 34px; border: none; cursor: pointer; font-size: 1.1em; margin: 0; padding: 0; }
+        .shield-wrapper .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
+        .shield-wrapper .btn-add { background: #28a745; color: white; }
+        .shield-wrapper .btn-gen { background: #007bff; color: white; width: 100%; margin-top: 15px; font-size: 1.1em; }
+        .shield-wrapper .btn-print { background: #6c757d; color: white; margin-top: 10px; display: none; }
+        .shield-wrapper .btn-import { background: #17a2b8; color: white; float: right; }
+        .shield-wrapper .btn-del { background: transparent; color: #dc3545; width: 100%; height: 36px; border: none; cursor: pointer; font-size: 1.1em; }
         .shield-wrapper .btn-del:hover { background: #dc3545; color: white; }
-        .shield-wrapper .btn-clear { background: transparent; color: #f44336; float: right; padding: 4px 8px; font-size: 0.9em; text-decoration: underline; cursor: pointer; border: none; }
+        .shield-wrapper .btn-clear { background: transparent; color: #f44336; float: right; text-decoration: underline; cursor: pointer; border: none; margin-left: 10px; }
 
-        .shield-wrapper .mobile-label { display: none; font-size: 10px; color: var(--text-muted); margin: 2px 0 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .shield-wrapper #import-panel { display: none; background: #fff; border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        .shield-wrapper #import-panel textarea { width: 100%; height: 120px; font-family: monospace; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ccc; }
 
-        .shield-wrapper #import-panel { display: none; background: var(--background-secondary); border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; margin-top: 10px; }
-        .shield-wrapper #import-panel textarea { width: 100%; height: 100px; font-family: monospace; font-size: 0.9em; padding: 10px; border: 1px solid var(--background-modifier-border); border-radius: 4px; background: var(--background-primary); color: var(--text-normal); margin-bottom: 10px; box-sizing: border-box; resize: vertical; }
-
-        #print-area { display: flex; flex-direction: column; align-items: center; }
-
-        @media (max-width: 650px) {
-            body { padding: 10px; }
-            .shield-wrapper table { border: none; background: transparent; }
-            .shield-wrapper thead { display: none; } 
-            .shield-wrapper tr { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; padding: 6px; border: 1px solid var(--background-modifier-border); border-radius: 6px; background: var(--background-primary); }
-            .shield-wrapper td { border: none; padding: 0; display: block; background: var(--background-secondary); border-radius: 4px; }
-            .shield-wrapper .mobile-label { display: block; }
-
-            .shield-wrapper td:nth-child(1) { width: 18%; }
-            .shield-wrapper td:nth-child(2) { width: 33%; }
-            .shield-wrapper td:nth-child(5) { width: 28%; }
-            .shield-wrapper td:nth-child(6) { width: calc(21% - 12px); display: flex; align-items: flex-end; background: transparent; }
-            .shield-wrapper td:nth-child(3) { width: 100%; margin-top: 4px; }
-            .shield-wrapper td:nth-child(4) { width: 100%; margin-top: 0; }
-
-            .shield-wrapper input, .shield-wrapper select { height: 36px !important; font-size: 16px !important; padding: 0 6px !important; background: transparent !important; }
-            .shield-wrapper select.row-num, .shield-wrapper select.row-phases { text-align: left !important; text-align-last: left !important; padding-left: 8px !important; }
-            .shield-wrapper .btn-del { height: 36px !important; border: 1px solid rgba(220, 53, 69, 0.4) !important; border-radius: 4px !important; display: flex; align-items: center; justify-content: center; background: rgba(220, 53, 69, 0.05); }
-            .shield-wrapper .btn-add { height: 42px; padding: 0; margin-top: 4px; width: 100%; text-align: center; font-size: 1.05em; }
-            .shield-wrapper .btn-gen { height: 45px; margin-top: 10px; font-size: 1.1em; }
-            .shield-wrapper .ui-panel { padding: 10px; }
-            .shield-wrapper .btn-import { margin-top: 5px; float: none; width: 100%; margin-bottom: 10px; height: 42px; font-size: 1.05em; }
-        }
-
-        .shield-wrapper .din-rail { display: flex; flex-wrap: nowrap; border: 0.1mm dashed #000; background: white; margin-bottom: 0; width: fit-content; }
+        /* Стилі наклейок */
+        .shield-wrapper .din-rail { display: flex; flex-wrap: nowrap; border: 0.1mm dashed #000; background: white; margin-bottom: 5mm; width: fit-content; }
         .shield-wrapper .label { box-sizing: border-box; border-right: 0.1mm dashed #000; height: 30mm; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: white; color: black; overflow: hidden; }
         .shield-wrapper .label:last-child { border-right: none; }
-        .shield-wrapper .w-1 { width: var(--unit-w); } .shield-wrapper .w-2 { width: calc(var(--unit-w) * 2); } .shield-wrapper .w-3 { width: calc(var(--unit-w) * 3); } .shield-wrapper .w-4 { width: calc(var(--unit-w) * 4); }
-        .shield-wrapper .t-bar { position: absolute; top: 0; left: 0; width: 100%; height: 5.5mm; border-bottom: 0.1mm solid #000; display: flex; align-items: center; justify-content: center; font-size: 7pt; font-weight: bold; text-transform: uppercase; letter-spacing: -0.3px; color: #000; overflow: hidden; white-space: nowrap; box-sizing: border-box; padding: 0 0.5mm; }
-        .shield-wrapper .l-tag { position: absolute; top: 6mm; left: 1.5mm; font-size: 6.5pt; font-weight: bold; color: #444; text-transform: uppercase; }
-        .shield-wrapper .l-name { font-weight: bold; font-size: 8pt; margin-top: 10mm; width: 100%; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; padding: 0 1mm; box-sizing: border-box; }
-        .shield-wrapper .l-num { position: absolute; bottom: 0.5mm; right: 1mm; font-size: 7pt; color: #888; }
         
-        .shield-wrapper .type-light { background: #fff176; } .shield-wrapper .type-socket { background: #81c784; } .shield-wrapper .type-heavy { background: #e57373; } .shield-wrapper .type-rccb { background: #64b5f6; } .shield-wrapper .type-gen { background: #ffb74d; } .shield-wrapper .type-sec { background: #ba68c8; } .shield-wrapper .type-climat { background: #4dd0e1; } .shield-wrapper .type-blank { background: #eee; } .shield-wrapper .type-net { background: #455a64; color: #fff; }
+        .shield-wrapper .w-1 { width: var(--unit-w); } 
+        .shield-wrapper .w-2 { width: calc(var(--unit-w) * 2); } 
+        .shield-wrapper .w-3 { width: calc(var(--unit-w) * 3); } 
+        .shield-wrapper .w-4 { width: calc(var(--unit-w) * 4); }
+        
+        .shield-wrapper .t-bar { position: absolute; top: 0; left: 0; width: 100%; height: 5.5mm; border-bottom: 0.1mm solid #000; display: flex; align-items: center; justify-content: center; font-size: 7pt; font-weight: bold; text-transform: uppercase; color: #000; box-sizing: border-box; }
+        .shield-wrapper .l-tag { position: absolute; top: 6mm; left: 1.5mm; font-size: 6.5pt; font-weight: bold; color: #444; }
+        .shield-wrapper .l-name { font-weight: bold; font-size: 8pt; margin-top: 10mm; width: 100%; line-height: 1.1; padding: 0 1mm; box-sizing: border-box; }
+        .shield-wrapper .l-num { position: absolute; bottom: 0.5mm; right: 1mm; font-size: 7pt; color: #888; }
+
+        /* Кольори типів */
+        .type-light { background: #fff176 !important; } 
+        .type-socket { background: #81c784 !important; } 
+        .type-heavy { background: #e57373 !important; } 
+        .type-rccb { background: #64b5f6 !important; } 
+        .type-gen { background: #ffb74d !important; } 
+        .type-sec { background: #ba68c8 !important; } 
+        .type-climat { background: #4dd0e1 !important; } 
+        .type-blank { background: #eee !important; } 
+        .type-net { background: #455a64 !important; color: #fff !important; }
 
         @media print { 
-            body { background: white; padding: 0; margin: 0; }
-            .shield-wrapper .ui-panel { display: none; } 
-            .shield-wrapper .din-rail { margin-bottom: 0; page-break-inside: avoid; } 
+            body { background: white; margin: 0; }
+            .ui-panel { display: none !important; } 
+            .shield-wrapper { width: 100%; }
+            .din-rail { page-break-inside: avoid; margin-bottom: 2mm; } 
         }
     </style>
 </head>
 <body>
 
-<div class="shield-wrapper">
+<div class="shield-wrapper" id="mainContainer">
     <div class="ui-panel">
         <button class="btn-clear" id="btnClear">Очистити все</button>
-        <button class="btn btn-import" id="btnToggleImport">📥 Вставити текст</button>
+        <button class="btn btn-import" id="btnToggleImport">📥 Вставити Markdown</button>
         
-        <h2 style="margin-top: 0; margin-bottom: 15px; color: #222;">⚡️ Конструктор щита</h2>
+        <h3 style="margin-top: 0; margin-bottom: 10px;">⚡️ Конструктор щита</h3>
         
         <div id="import-panel">
-            <div style="font-size: 0.9em; margin-bottom: 8px; color: var(--text-muted);">
-                Скопіюйте колонки з Excel: <b>Позначення</b> та <b>Назва</b>.
+            <div style="font-size: 0.85em; margin-bottom: 5px; color: var(--text-muted);">
+                Скопіюйте сюди вашу таблицю в форматі Markdown (|).
             </div>
-            <textarea id="importText" placeholder="Наприклад:&#10;QF1&#9;Світло кухня&#10;QF2&#9;Розетки зал"></textarea>
-            <button class="btn btn-add" id="btnProcessImport" style="width: 100%; padding: 10px;">Обробити дані</button>
+            <textarea id="importText" placeholder="| № | Познач | Назва | Шир | Тип | Ряд |"></textarea>
+            <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити таблицю</button>
         </div>
 
-        <div style="margin-bottom: 12px; font-size: 0.95em;">
-            <label><strong>Модулів на рейку:</strong>
-                <select id="railLimit" style="width: auto; display: inline-block; height: auto; padding: 4px 8px; border: 1px solid var(--background-modifier-border) !important; border-radius: 4px !important; margin-left: 5px;">
+        <div style="margin-bottom: 15px; font-size: 0.9em;">
+            <label>Модулів на рейку:
+                <select id="railLimit" style="width: auto; display: inline-block; padding: 4px; border: 1px solid #ccc !important; border-radius: 4px !important; height: auto;">
                     <option value="12" selected>12</option>
                     <option value="18">18</option>
                     <option value="24">24</option>
                 </select>
             </label>
         </div>
+        
         <table>
-            <thead><tr>
-                <th style="width: 50px; text-align: center;">Ряд</th>
-                <th style="width: 70px;">Поз.</th>
-                <th style="width: 40%;">Назва лінії</th>
-                <th>Тип</th>
-                <th style="width: 60px; text-align: center;">Шир.</th>
-                <th style="width: 35px;"></th>
-            </tr></thead>
+            <thead>
+                <tr>
+                    <th style="width: 60px; text-align: center;">Ряд</th>
+                    <th style="width: 80px;">Поз.</th>
+                    <th>Назва лінії</th>
+                    <th style="width: 120px;">Тип</th>
+                    <th style="width: 60px; text-align: center;">Шир.</th>
+                    <th style="width: 40px;"></th>
+                </tr>
+            </thead>
             <tbody id="tableBody"></tbody>
         </table>
+        
         <button class="btn btn-add" id="btnAdd">+ Додати лінію</button>
         <button class="btn btn-gen" id="btnGen">Сформувати наклейки</button>
         <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати</button>
     </div>
+    
     <div id="print-area"></div>
 </div>
 
 <script>
-    if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
-    .then(() => console.log("Service Worker Registered"));
-    }
-    // Логіка JS
-    const DeviceTypes = {
-        LIGHT:  { label: 'Світло', class: 'type-light' },
-        SOCKET: { label: 'Розетки', class: 'type-socket' },
-        HEAVY:  { label: 'Силове', class: 'type-heavy' },
-        RCCB:   { label: 'ПЗВ/Диф', class: 'type-rccb' },
-        GEN:    { label: 'Генератор', class: 'type-gen' },
-        SEC:    { label: 'Безпека', class: 'type-sec' },
-        NET:    { label: 'Iнтернет', class: 'type-net' },
-        CLIMAT: { label: 'Клімат', class: 'type-climat' },
-        BLANK:  { label: 'Резерв', class: 'type-blank' }
-    };
+const DeviceTypes = {
+    LIGHT:  { label: 'Світло', class: 'type-light' },
+    SOCKET: { label: 'Розетки', class: 'type-socket' },
+    HEAVY:  { label: 'Силове', class: 'type-heavy' },
+    RCCB:   { label: 'ПЗВ/Диф', class: 'type-rccb' },
+    GEN:    { label: 'Генератор', class: 'type-gen' },
+    SEC:    { label: 'Безпека', class: 'type-sec' },
+    NET:    { label: 'IT', class: 'type-net' },
+    CLIMAT: { label: 'Клімат', class: 'type-climat' },
+    BLANK:  { label: 'Резерв', class: 'type-blank' }
+};
 
-    const tableBody = document.querySelector('#tableBody');
-    const railLimit = document.querySelector('#railLimit');
-    const printArea = document.querySelector('#print-area');
-    const btnPrint = document.querySelector('#btnPrint');
+const tableBody = document.getElementById('tableBody');
+const railLimit = document.getElementById('railLimit');
+const printArea = document.getElementById('print-area');
+const btnPrint = document.getElementById('btnPrint');
 
-    function getRowSum(rNum, excludeTr = null) {
-        let sum = 0;
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            if (row !== excludeTr && parseInt(row.querySelector('.row-num').value) === parseInt(rNum)) {
-                sum += parseInt(row.querySelector('.row-phases').value) || 0;
-            }
-        });
-        return sum;
-    }
-
-    function getNextTag(tag) {
-        if (!tag) return '';
-        const match = tag.match(/^(.*?)(\d+)$/);
-        if (match) {
-            const numStr = match[2];
-            const nextNum = (parseInt(numStr, 10) + 1).toString();
-            return match[1] + nextNum.padStart(numStr.length, '0');
+function getRowSum(rNum, excludeTr = null) {
+    let sum = 0;
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+        if (row !== excludeTr && parseInt(row.querySelector('.row-num').value) === parseInt(rNum)) {
+            sum += parseInt(row.querySelector('.row-phases').value) || 0;
         }
-        return tag;
-    }
-
-    function saveData() {
-        const rows = document.querySelectorAll('#tableBody tr');
-        const data = Array.from(rows).map(row => ({
-            r: row.querySelector('.row-num').value,
-            tag: row.querySelector('.row-tag').value,
-            n: row.querySelector('.row-name').value,
-            t: row.querySelector('.row-type').value,
-            p: row.querySelector('.row-phases').value
-        }));
-        localStorage.setItem('html_shield_v20_data', JSON.stringify(data));
-        localStorage.setItem('html_shield_v20_limit', railLimit.value);
-    }
-
-    function addRow(rNum = 1, tag = '', name = '', type = 'LIGHT', phases = 1) {
-        const tr = document.createElement('tr');
-        
-        let typeOptions = '';
-        for (const [key, value] of Object.entries(DeviceTypes)) {
-            typeOptions += '<option value="' + key + '" ' + (type === key ? 'selected' : '') + '>' + value.label + '</option>';
-        }
-
-        let rowOptions = '';
-        for (let i = 1; i <= 15; i++) {
-            rowOptions += '<option value="' + i + '" ' + (parseInt(rNum) === i ? 'selected' : '') + '>' + i + '</option>';
-        }
-
-        tr.innerHTML = '<td><div class="mobile-label">Ряд</div><select class="row-num" style="text-align: center; text-align-last: center;">' + rowOptions + '</select></td>' +
-            '<td><div class="mobile-label">Поз.</div><input type="text" class="row-tag" value="' + tag + '" placeholder="QF1"></td>' +
-            '<td><div class="mobile-label" style="display:none;">Назва</div><input type="text" class="row-name" value="' + name + '" placeholder="Введіть назву..."></td>' +
-            '<td><div class="mobile-label" style="display:none;">Тип</div><select class="row-type">' + typeOptions + '</select></td>' +
-            '<td><div class="mobile-label">Шир.</div><select class="row-phases" style="text-align: center; text-align-last: center;">' +
-            '<option value="1" ' + (phases == 1 ? 'selected' : '') + '>1</option>' +
-            '<option value="2" ' + (phases == 2 ? 'selected' : '') + '>2</option>' +
-            '<option value="3" ' + (phases == 3 ? 'selected' : '') + '>3</option>' +
-            '<option value="4" ' + (phases == 4 ? 'selected' : '') + '>4</option>' +
-            '</select></td>' +
-            '<td><button class="btn-del" title="Видалити">✕</button></td>';
-
-        const numSelect = tr.querySelector('.row-num');
-        const phaseSelect = tr.querySelector('.row-phases');
-
-        numSelect.dataset.prev = parseInt(rNum) || 1;
-        phaseSelect.dataset.prev = phases;
-
-        numSelect.addEventListener('change', function() {
-            const limit = parseInt(railLimit.value);
-            const p = parseInt(phaseSelect.value);
-            if (getRowSum(this.value, tr) + p > limit) {
-                alert('⚠️ Помилка: У ряду ' + this.value + ' недостатньо місця для ' + p + ' мод. (Ліміт: ' + limit + ')');
-                this.value = this.dataset.prev;
-            } else {
-                this.dataset.prev = this.value;
-                saveData();
-            }
-        });
-
-        phaseSelect.addEventListener('change', function() {
-            const limit = parseInt(railLimit.value);
-            const r = parseInt(numSelect.value);
-            const p = parseInt(this.value);
-            if (getRowSum(r, tr) + p > limit) {
-                alert('⚠️ Помилка: Ряд ' + r + ' переповнений! Максимум ' + limit + ' мод.');
-                this.value = this.dataset.prev;
-            } else {
-                this.dataset.prev = this.value;
-                saveData();
-            }
-        });
-
-        tr.querySelector('.row-tag').addEventListener('input', saveData);
-        tr.querySelector('.row-name').addEventListener('input', saveData);
-        tr.querySelector('.row-type').addEventListener('change', saveData);
-        tr.querySelector('.btn-del').addEventListener('click', () => { tr.remove(); saveData(); });
-
-        tableBody.appendChild(tr);
-        saveData();
-    }
-
-    // === ІМПОРТ ===
-    document.querySelector('#btnToggleImport').addEventListener('click', () => {
-        const panel = document.querySelector('#import-panel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     });
+    return sum;
+}
 
-    document.querySelector('#btnProcessImport').addEventListener('click', () => {
-        const text = document.querySelector('#importText').value.trim();
-        if (!text) return;
+function getNextTag(tag) {
+    if (!tag) return '';
+    const match = tag.match(/^(.*?)(\d+)$/);
+    if (match) {
+        const numStr = match[2];
+        const nextNum = (parseInt(numStr, 10) + 1).toString();
+        return match[1] + nextNum.padStart(numStr.length, '0');
+    }
+    return tag;
+}
 
-        const lines = text.split(/\r?\n/);
-        const limit = parseInt(railLimit.value);
-        
-        const existingRows = document.querySelectorAll('#tableBody tr');
-        let currentRow = 1;
-        if(existingRows.length > 0) {
-            currentRow = parseInt(existingRows[existingRows.length - 1].querySelector('.row-num').value) || 1;
-        }
+function saveData() {
+    const rows = document.querySelectorAll('#tableBody tr');
+    const data = Array.from(rows).map(row => ({
+        r: row.querySelector('.row-num').value,
+        tag: row.querySelector('.row-tag').value,
+        n: row.querySelector('.row-name').value,
+        t: row.querySelector('.row-type').value,
+        p: row.querySelector('.row-phases').value
+    }));
+    localStorage.setItem('shield_data', JSON.stringify(data));
+    localStorage.setItem('shield_limit', railLimit.value);
+}
 
-        lines.forEach(line => {
-            line = line.trim();
-            if (!line) return;
+function addRow(rNum = 1, tag = '', name = '', type = 'LIGHT', phases = 1) {
+    const tr = document.createElement('tr');
+    
+    let typeOptions = Object.entries(DeviceTypes).map(([key, value]) => 
+        `<option value="${key}" ${type === key ? 'selected' : ''}>${value.label}</option>`
+    ).join('');
 
-            let tag = '';
-            let name = '';
+    let rowOptions = Array.from({length: 15}, (_, i) => i + 1).map(i => 
+        `<option value="${i}" ${parseInt(rNum) === i ? 'selected' : ''}>${i}</option>`
+    ).join('');
 
-            let cols = line.split(/\t/).map(c => c.trim()).filter(c => c !== '');
+    tr.innerHTML = `
+        <td><select class="row-num">${rowOptions}</select></td>
+        <td><input type="text" class="row-tag" value="${tag}" placeholder="QF1"></td>
+        <td><input type="text" class="row-name" value="${name}" placeholder="Введіть назву..."></td>
+        <td><select class="row-type">${typeOptions}</select></td>
+        <td><select class="row-phases">${[1,2,3,4].map(v => `<option value="${v}" ${phases == v ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+        <td><button class="btn-del">✕</button></td>
+    `;
 
-            if (cols.length === 1) {
-                cols = line.split(/\s{2,}/).map(c => c.trim()).filter(c => c !== '');
-            }
+    const numSelect = tr.querySelector('.row-num');
+    const phaseSelect = tr.querySelector('.row-phases');
 
-            if (cols.length === 1) {
-                const firstSpace = line.indexOf(' ');
-                if (firstSpace > 0 && firstSpace < 10) { 
-                    tag = line.substring(0, firstSpace).trim();
-                    name = line.substring(firstSpace + 1).trim();
-                } else {
-                    name = line;
-                }
-            } else {
-                tag = cols[0];
-                name = cols[1];
-            }
+    numSelect.dataset.prev = rNum;
+    phaseSelect.dataset.prev = phases;
 
-            if (getRowSum(currentRow) + 1 > limit) {
-                currentRow++;
-            }
-
-            addRow(currentRow, tag, name, 'LIGHT', 1);
-        });
-
-        document.querySelector('#importText').value = '';
-        document.querySelector('#import-panel').style.display = 'none';
-        saveData();
-    });
-
-    function loadData() {
-        const savedData = localStorage.getItem('html_shield_v20_data');
-        const savedLimit = localStorage.getItem('html_shield_v20_limit');
-        if (savedLimit) railLimit.value = savedLimit;
-        if (savedData && savedData !== '[]') {
-            JSON.parse(savedData).forEach(item => addRow(item.r || 1, item.tag || '', item.n, item.t, item.p));
+    numSelect.addEventListener('change', function() {
+        if (getRowSum(this.value, tr) + parseInt(phaseSelect.value) > parseInt(railLimit.value)) {
+            alert('Недостатньо місця в ряду!');
+            this.value = this.dataset.prev;
         } else {
-            addRow(1, 'QS1', 'Ввідний вимикач', 'HEAVY', 3);
-            addRow(1, 'QF1', 'Світло кухня', 'LIGHT', 1);
+            this.dataset.prev = this.value;
+            saveData();
         }
+    });
+
+    phaseSelect.addEventListener('change', function() {
+        if (getRowSum(numSelect.value, tr) + parseInt(this.value) > parseInt(railLimit.value)) {
+            alert('Ряд переповнений!');
+            this.value = this.dataset.prev;
+        } else {
+            this.dataset.prev = this.value;
+            saveData();
+        }
+    });
+
+    tr.querySelector('.row-tag').addEventListener('input', saveData);
+    tr.querySelector('.row-name').addEventListener('input', saveData);
+    tr.querySelector('.row-type').addEventListener('change', saveData);
+    tr.querySelector('.btn-del').addEventListener('click', () => { tr.remove(); saveData(); });
+
+    tableBody.appendChild(tr);
+    saveData();
+}
+
+// Ініціалізація кнопок
+document.getElementById('btnToggleImport').onclick = () => {
+    const panel = document.getElementById('import-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+};
+
+document.getElementById('btnAdd').onclick = () => {
+    const rows = document.querySelectorAll('#tableBody tr');
+    let targetRow = 1, nextTag = '', nextType = 'LIGHT', nextPhases = 1;
+
+    if(rows.length > 0) {
+        const last = rows[rows.length - 1];
+        targetRow = parseInt(last.querySelector('.row-num').value);
+        nextTag = getNextTag(last.querySelector('.row-tag').value);
+        nextType = last.querySelector('.row-type').value;
+        nextPhases = parseInt(last.querySelector('.row-phases').value);
+        if (getRowSum(targetRow) + nextPhases > parseInt(railLimit.value)) targetRow++;
     }
+    addRow(targetRow, nextTag, '', nextType, nextPhases);
+};
 
-    document.querySelector('#btnAdd').addEventListener('click', () => {
-        const rows = document.querySelectorAll('#tableBody tr');
-        const limit = parseInt(railLimit.value);
-        
-        let targetRow = 1;
-        let nextTag = '';
-        let nextType = 'LIGHT';
-        let nextPhases = 1;
+document.getElementById('btnGen').onclick = () => {
+    const limit = parseInt(railLimit.value);
+    const rows = Array.from(document.querySelectorAll('#tableBody tr'));
+    printArea.innerHTML = '';
+    btnPrint.style.display = 'inline-block';
 
-        if(rows.length > 0) {
-            const lastRowEl = rows[rows.length - 1];
-            targetRow = parseInt(lastRowEl.querySelector('.row-num').value) || 1;
-            nextTag = getNextTag(lastRowEl.querySelector('.row-tag').value || '');
-            nextType = lastRowEl.querySelector('.row-type').value || 'LIGHT';
-            nextPhases = parseInt(lastRowEl.querySelector('.row-phases').value) || 1;
+    const grouped = {};
+    rows.forEach(row => {
+        const r = row.querySelector('.row-num').value;
+        if (!grouped[r]) grouped[r] = [];
+        grouped[r].push({
+            tag: row.querySelector('.row-tag').value,
+            name: row.querySelector('.row-name').value,
+            typeKey: row.querySelector('.row-type').value,
+            phases: parseInt(row.querySelector('.row-phases').value)
+        });
+    });
 
-            if (getRowSum(targetRow) + nextPhases > limit) {
-                targetRow++;
+    let globalIdx = 1;
+    Object.keys(grouped).sort((a,b)=>a-b).forEach(rNum => {
+        let rail = document.createElement('div');
+        rail.className = 'din-rail';
+        let used = 0;
+
+        grouped[rNum].forEach(item => {
+            if (used + item.phases > limit) {
+                printArea.appendChild(rail);
+                rail = document.createElement('div');
+                rail.className = 'din-rail';
+                used = 0;
             }
-        }
-        addRow(targetRow, nextTag, '', nextType, nextPhases);
-    });
+            const label = document.createElement('div');
+            label.className = `label w-${item.phases}`;
+            const typeInfo = DeviceTypes[item.typeKey];
+            const numLabel = item.phases > 1 ? `${globalIdx}-${globalIdx + item.phases - 1}` : globalIdx;
 
-    document.querySelector('#btnClear').addEventListener('click', () => {
-        if (confirm('Очистити всі налаштування?')) {
-            localStorage.removeItem('html_shield_v20_data');
-            tableBody.innerHTML = '';
-            addRow(1, 'QS1', 'Ввід', 'HEAVY', 3);
-        }
-    });
-
-    document.querySelector('#btnGen').addEventListener('click', () => {
-        const limit = parseInt(railLimit.value);
-        const rows = Array.from(document.querySelectorAll('#tableBody tr'));
-        printArea.innerHTML = '';
-        btnPrint.style.display = 'inline-block';
-
-        const groupedRows = {};
-        rows.forEach(row => {
-            const rNum = parseInt(row.querySelector('.row-num').value) || 1;
-            if (!groupedRows[rNum]) groupedRows[rNum] = [];
-            groupedRows[rNum].push({
-                tag: row.querySelector('.row-tag').value || '',
-                name: row.querySelector('.row-name').value || '',
-                typeKey: row.querySelector('.row-type').value,
-                phases: parseInt(row.querySelector('.row-phases').value)
-            });
+            label.innerHTML = `
+                <div class="t-bar ${typeInfo.class}">${typeInfo.label}</div>
+                ${item.tag ? `<div class="l-tag">${item.tag}</div>` : ''}
+                <div class="l-name">${item.name}</div>
+                <div class="l-num">${numLabel}</div>
+            `;
+            rail.appendChild(label);
+            used += item.phases;
+            globalIdx += item.phases;
         });
-
-        const sortedRowKeys = Object.keys(groupedRows).sort((a, b) => a - b);
-        let globalModuleIdx = 1;
-
-        sortedRowKeys.forEach(rowNum => {
-            let currentRail = document.createElement('div');
-            currentRail.className = 'din-rail';
-            let currentUsedWidth = 0;
-
-            groupedRows[rowNum].forEach(item => {
-                if (currentUsedWidth + item.phases > limit) {
-                    printArea.appendChild(currentRail);
-                    currentRail = document.createElement('div');
-                    currentRail.className = 'din-rail';
-                    currentUsedWidth = 0;
-                }
-
-                const label = document.createElement('div');
-                label.className = 'label w-' + item.phases;
-                const typeInfo = DeviceTypes[item.typeKey];
-                const numLabel = item.phases > 1 ? globalModuleIdx + '-' + (globalModuleIdx + item.phases - 1) : globalModuleIdx;
-
-                label.innerHTML = '<div class="t-bar ' + typeInfo.class + '">' + typeInfo.label + '</div>' +
-                    (item.tag ? '<div class="l-tag">' + item.tag + '</div>' : '') +
-                    '<div class="l-name">' + item.name + '</div>' +
-                    '<div class="l-num">' + numLabel + '</div>';
-
-                currentRail.appendChild(label);
-                currentUsedWidth += item.phases;
-                globalModuleIdx += item.phases;
-            });
-            printArea.appendChild(currentRail);
-        });
+        printArea.appendChild(rail);
     });
+};
 
-    btnPrint.addEventListener('click', () => window.print());
+document.getElementById('btnProcessImport').onclick = () => {
+    const text = document.getElementById('importText').value.trim();
+    if (!text) return;
+    const lines = text.split('\n');
+    lines.forEach(line => {
+        if (!line.includes('|')) return;
+        const cols = line.split('|').map(c => c.trim());
+        if (cols.length >= 4 && !line.includes('---') && !line.toLowerCase().includes('назва')) {
+            addRow(cols[6] || 1, cols[2], cols[3], 'LIGHT', parseInt(cols[4]) || 1);
+        }
+    });
+    document.getElementById('importText').value = '';
+    document.getElementById('import-panel').style.display = 'none';
+};
 
-    loadData();
+document.getElementById('btnClear').onclick = () => {
+    if(confirm('Очистити?')) { tableBody.innerHTML = ''; localStorage.clear(); }
+};
+
+btnPrint.onclick = () => window.print();
+
+// Завантаження даних
+const savedData = localStorage.getItem('shield_data');
+if (savedData) {
+    JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p));
+} else {
+    addRow(1, 'QS1', 'Ввідний автомат', 'HEAVY', 3);
+}
 </script>
-
 </body>
 </html>
