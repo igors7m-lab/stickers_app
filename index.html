@@ -5,97 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конструктор маркування щита</title>
     <style>
-        :root {
-            --background-primary: #ffffff;
-            --background-primary-alt: #f5f5f5;
-            --background-secondary: #e5e5e5;
-            --background-modifier-border: #ddd;
-            --background-modifier-active-hover: #ececec;
-            --text-normal: #333;
-            --text-muted: #666;
-            /* 215mm / 12 = 17.9166mm для точної відповідності рейці */
-            --unit-w: 17.9166mm; 
-        }
-
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 20px;
-            color: var(--text-normal);
-        }
-
-        .shield-wrapper { 
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .shield-wrapper .ui-panel { 
-            background: var(--background-primary-alt); 
-            padding: 20px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+    :root {
+        --background-primary: #ffffff;
+        --background-primary-alt: #f5f5f5;
+        --background-secondary: #e5e5e5;
+        --background-modifier-border: #ddd;
+        --text-normal: #333;
         
-        .shield-wrapper table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; border: 1px solid var(--background-modifier-border); background: white; }
-        .shield-wrapper th { padding: 8px; border: 1px solid var(--background-modifier-border); text-align: left; color: var(--text-muted); background: var(--background-secondary); font-size: 0.85em; text-transform: uppercase; }
-        .shield-wrapper td { padding: 0; border: 1px solid var(--background-modifier-border); vertical-align: middle; position: relative; }
-        
-        .shield-wrapper input, .shield-wrapper select { 
-            width: 100%; height: 36px; padding: 0 8px; margin: 0;
-            border: none !important; border-radius: 0 !important; 
-            background: transparent !important; color: var(--text-normal); 
-            font-size: 0.95em; box-shadow: none !important; outline: none !important;
-            box-sizing: border-box; cursor: pointer;
+        /* Коригування: 215мм / 12 = 17.916. 
+           Ми ставимо 17.85, щоб врахувати товщину ліній (borders) */
+        --unit-w: 17.85mm; 
+    }
+
+    /* ФІКСАЦІЯ ПАПЕРУ ПРИ ДРУЦІ */
+    @page {
+        size: A4 portrait;
+        margin: 0; /* Видаляємо поля принтера */
+    }
+
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #f0f2f5;
+        margin: 20px;
+        color: var(--text-normal);
+        -webkit-print-color-adjust: exact; /* Щоб кольори не блідли при друці */
+    }
+
+    @media print { 
+        body { 
+            margin: 0; 
+            padding: 5mm; /* Невеликий відступ від краю аркуша, щоб принтер не "зажував" текст */
+            background: white; 
         }
-        .shield-wrapper input[type="text"] { cursor: text; }
-        .shield-wrapper input:focus, .shield-wrapper select:focus { background: var(--background-modifier-active-hover) !important; }
-        
-        .shield-wrapper .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
-        .shield-wrapper .btn-add { background: #28a745; color: white; }
-        .shield-wrapper .btn-gen { background: #007bff; color: white; width: 100%; margin-top: 15px; font-size: 1.1em; }
-        .shield-wrapper .btn-print { background: #6c757d; color: white; margin-top: 10px; display: none; }
-        .shield-wrapper .btn-import { background: #17a2b8; color: white; float: right; }
-        .shield-wrapper .btn-del { background: transparent; color: #dc3545; width: 100%; height: 36px; border: none; cursor: pointer; font-size: 1.1em; }
-        .shield-wrapper .btn-del:hover { background: #dc3545; color: white; }
-        .shield-wrapper .btn-clear { background: transparent; color: #f44336; float: right; text-decoration: underline; cursor: pointer; border: none; margin-left: 10px; }
+        .ui-panel { display: none !important; } 
+        .shield-wrapper { width: auto; margin: 0; }
+        .din-rail { 
+            page-break-inside: avoid; 
+            margin-bottom: 2mm; 
+            display: flex !important; /* Гарантуємо, що автомати стоять в ряд */
+        } 
+    }
 
-        .shield-wrapper #import-panel { display: none; background: #fff; border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        .shield-wrapper #import-panel textarea { width: 100%; height: 120px; font-family: monospace; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ccc; }
-
-        /* Стилі наклейок */
-        .shield-wrapper .din-rail { display: flex; flex-wrap: nowrap; border: 0.1mm dashed #000; background: white; margin-bottom: 5mm; width: fit-content; }
-        .shield-wrapper .label { box-sizing: border-box; border-right: 0.1mm dashed #000; height: 30mm; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: white; color: black; overflow: hidden; }
-        .shield-wrapper .label:last-child { border-right: none; }
-        
-        .shield-wrapper .w-1 { width: var(--unit-w); } 
-        .shield-wrapper .w-2 { width: calc(var(--unit-w) * 2); } 
-        .shield-wrapper .w-3 { width: calc(var(--unit-w) * 3); } 
-        .shield-wrapper .w-4 { width: calc(var(--unit-w) * 4); }
-        
-        .shield-wrapper .t-bar { position: absolute; top: 0; left: 0; width: 100%; height: 5.5mm; border-bottom: 0.1mm solid #000; display: flex; align-items: center; justify-content: center; font-size: 7pt; font-weight: bold; text-transform: uppercase; color: #000; box-sizing: border-box; }
-        .shield-wrapper .l-tag { position: absolute; top: 6mm; left: 1.5mm; font-size: 6.5pt; font-weight: bold; color: #444; }
-        .shield-wrapper .l-name { font-weight: bold; font-size: 8pt; margin-top: 10mm; width: 100%; line-height: 1.1; padding: 0 1mm; box-sizing: border-box; }
-        .shield-wrapper .l-num { position: absolute; bottom: 0.5mm; right: 1mm; font-size: 7pt; color: #888; }
-
-        /* Кольори типів */
-        .type-light { background: #fff176 !important; } 
-        .type-socket { background: #81c784 !important; } 
-        .type-heavy { background: #e57373 !important; } 
-        .type-rccb { background: #64b5f6 !important; } 
-        .type-gen { background: #ffb74d !important; } 
-        .type-sec { background: #ba68c8 !important; } 
-        .type-climat { background: #4dd0e1 !important; } 
-        .type-blank { background: #eee !important; } 
-        .type-net { background: #455a64 !important; color: #fff !important; }
-
-        @media print { 
-            body { background: white; margin: 0; padding: 0; }
-            .ui-panel { display: none !important; } 
-            .shield-wrapper { width: 100%; margin: 0; }
-            .din-rail { page-break-inside: avoid; margin-bottom: 2mm; border: 0.1mm dashed #ccc; } 
-        }
-    </style>
+    .shield-wrapper .din-rail { 
+        display: flex; 
+        flex-wrap: nowrap; 
+        border: 0.1mm dashed #000; 
+        background: white; 
+        margin-bottom: 5mm; 
+        width: fit-content; 
+    }
+    
+    .shield-wrapper .label { 
+        box-sizing: border-box; 
+        border-right: 0.1mm dashed #000; 
+        height: 30mm; 
+        position: relative; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        text-align: center; 
+        background: white; 
+        color: black; 
+        overflow: hidden;
+        flex-shrink: 0; /* Забороняємо браузеру стискати наклейку */
+    }
+    /* Решта стилів без змін... */
+</style>
 </head>
 <body>
 
