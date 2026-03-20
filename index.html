@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор маркування щита</title>
+    <title>Конструктор маркування щита PRO (Автокалібрування)</title>
     <style>
         :root {
             --background-primary: #ffffff;
@@ -13,9 +13,12 @@
             --text-normal: #333;
             --text-muted: #666;
             
-            /* Змінні для точного калібрування розмірів */
-            --unit-w: 16.7mm; 
-            --unit-h: 30mm;
+            --scale-factor: 1;
+            --real-w: 17.9;
+            --real-h: 30;
+            
+            --unit-w: calc(var(--real-w) * var(--scale-factor) * 1mm); 
+            --unit-h: calc(var(--real-h) * var(--scale-factor) * 1mm);
         }
 
         @page {
@@ -55,67 +58,31 @@
             font-size: 0.95em; outline: none !important; box-sizing: border-box;
         }
 
-        .input-calib {
-            border: 1px solid #ccc !important;
-            background: white !important;
-            width: 70px;
-            display: inline-block;
-            text-align: center;
-        }
+        .input-calib { border: 1px solid #ccc !important; background: white !important; width: 70px; display: inline-block; text-align: center; }
 
-        .mod-idx {
-            font-size: 0.85em;
-            color: var(--text-muted);
-            text-align: center;
-            font-weight: bold;
-            display: block;
-        }
+        .mod-idx { font-size: 0.85em; color: var(--text-muted); text-align: center; font-weight: bold; display: block; }
 
         .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
-        .btn-add { background: #28a745; color: white; }
+        .btn-add { background: #17a2b8; color: white; }
         .btn-gen { background: #007bff; color: white; width: 100%; margin-top: 15px; font-size: 1.1em; }
         .btn-print { background: #6c757d; color: white; margin-top: 10px; display: none; }
-        .btn-import { background: #17a2b8; color: white; float: right; }
+        .btn-import { background: #17a2b8; color: white; float: right; margin-left: 10px; }
+        .btn-export { background: #ffffff; color: var(--text-muted); float: right; }
         .btn-del { background: transparent; color: #dc3545; width: 100%; border: none; cursor: pointer; font-size: 1.1em; }
-        .btn-clear { background: transparent; color: #f44336; float: right; text-decoration: underline; cursor: pointer; border: none; margin-left: 10px; }
+        .btn-clear { background: transparent; color: #f44336; text-decoration: underline; cursor: pointer; border: none; margin-bottom: 10px; }
 
-        #import-panel { display: none; background: #fff; border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        #import-panel textarea { width: 100%; height: 100px; font-family: monospace; padding: 10px; box-sizing: border-box; margin-bottom: 10px; }
+        #import-panel { display: none; background: #fff; border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; margin-top: 15px; clear: both; }
+        #import-panel textarea { width: 100%; height: 120px; font-family: monospace; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ccc !important; background: #fafafa !important; }
 
-        .settings-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-            align-items: center;
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 6px;
-            flex-wrap: wrap;
-        }
+        .settings-row { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; background: #e9ecef; padding: 10px; border-radius: 6px; flex-wrap: wrap; }
+        .calibration-box { background: #f6f5f5; padding: 10px; border-radius: 6px; border: 1px solid #e9ecef; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; }
 
-        .din-rail { 
-            display: flex; 
-            flex-wrap: nowrap; 
-            border: 0.1mm solid #000; 
-            background: white; 
-            margin-bottom: 5mm; 
-            width: max-content;
-        }
-        
-        .label { 
-            box-sizing: border-box; 
-            border-right: 0.1mm solid #000; 
-            height: var(--unit-h); 
-            position: relative; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center; 
-            background: white; 
-            color: black; 
-            overflow: hidden;
-            flex-shrink: 0; 
-        }
+        .print-calibration { display: none; margin-bottom: 3mm; font-size: 7pt; color: black; line-height: 1.1; }
+        .test-line { width: calc(100mm * var(--scale-factor)); height: 2mm; border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black; margin-top: 1mm; position: relative; }
+        .test-line::after { content: "100 мм"; position: absolute; top: 0.5mm; left: 50%; transform: translateX(-50%); font-size: 6pt; background: white; padding: 0 2px; }
+
+        .din-rail { display: flex; flex-wrap: nowrap; border: 0.1mm solid #000; background: white; margin-bottom: 5mm; width: max-content; }
+        .label { box-sizing: border-box; border-right: 0.1mm solid #000; height: var(--unit-h); position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: white; color: black; overflow: hidden; flex-shrink: 0; }
         .label:last-child { border-right: none; }
         
         .w-1 { width: var(--unit-w); min-width: var(--unit-w); max-width: var(--unit-w); } 
@@ -135,16 +102,21 @@
         .type-rccb { background: #64b5f6; } 
         .type-gen { background: #ffb74d; } 
         .type-net { background: #455a64; color: #fff; }
-	    .type-climate { background: #65edff; } /* Клімат */
-        .type-smart { background: #4db6ac; color: #fff; } /* Розумний дім */
-        .type-other { background: #f0f7e8; } /* інші */
-        .type-appliances { background: #7986cb; color: #fff; } /* Техніка */
+        .type-climate { background: #ff8a65; } 
+        .type-security { background: #ba68c8; color: #fff; } 
+        .type-smart { background: #4db6ac; color: #fff; } 
+        .type-power { background: #aed581; } 
+        .type-appliances { background: #7986cb; color: #fff; }
 
         @media print { 
-            body { background: white; margin: 0; padding: 10mm; } 
+            body { background: white; margin: 0; padding: 5mm; } 
             .ui-panel { display: none !important; } 
             .shield-wrapper { width: 100%; margin: 0; max-width: none; }
             .din-rail { page-break-inside: avoid; margin-bottom: 5mm; display: flex !important; } 
+            body.print-mode-test .print-calibration { display: block; }
+            body.print-mode-test #labels-container { display: none !important; }
+            body.print-mode-labels .print-calibration { display: none !important; }
+            body.print-mode-labels #labels-container { display: block; }
         }
     </style>
 </head>
@@ -152,43 +124,64 @@
 
 <div class="shield-wrapper">
     <div class="ui-panel">
-        <button class="btn-clear" id="btnClear">Очистити все</button>
-        <button class="btn btn-import" id="btnToggleImport">📥 Імпорт даних</button>
-        
-        <h3 style="margin-top: 0;">⚡️ Конструктор маркування</h3>
+        <div>
+            <h3 style="margin-top: 0; display: inline-block;">⚡️ Конструктор маркування</h3>
+            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт</button>
+            <button class="btn btn-export" id="btnExport">📤 Експорт у CSV</button>
+        </div>
         
         <div id="import-panel">
-    <div style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">
-        <strong>Порядок колонок (CSV або Markdown):</strong><br>
-        Позначка | Назва лінії | Ширина (мод.) | Тип (напр. LIGHT) | Номер ряду
-    </div>
-    <textarea id="importText" placeholder="Вставте ваш список сюди..."></textarea>
-    <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити</button>
-</div>
+            <div style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 10px;">
+                <strong>Вкажіть колонки даних:</strong>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; font-size: 0.85em;">
+                <div>Поз.:<br><select id="mTag" class="input-calib" style="width: 50px;"><option value="0" selected>1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select></div>
+                <div>Назва:<br><select id="mName" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1" selected>2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select></div>
+                <div>Шир.:<br><select id="mWidth" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2" selected>3</option><option value="3">4</option><option value="4">5</option></select></div>
+                <div>Тип:<br><select id="mType" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3" selected>4</option><option value="4">5</option></select></div>
+                <div>Ряд:<br><select id="mRow" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4" selected>5</option></select></div>
+            </div>
+            <textarea id="importText" placeholder="Вставте текст з Excel..."></textarea>
+            <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити дані</button>
+        </div>
 
         <div class="settings-row">
             <div>
                 Модулів на рейку:
-                <select id="railLimit" style="width: auto; border: 1px solid #ccc !important; height: auto; padding: 2px;">
+                <select id="railLimit" style="width: auto; border: 1px solid #ccc !important; padding: 2px;">
                     <option value="12" selected>12</option>
                     <option value="18">18</option>
                     <option value="24">24</option>
+                    <option value="36">36</option>
                 </select>
             </div>
             <div>
-                <strong>Ширина 1 мод. (мм):</strong>
-                <input type="number" step="0.1" id="calibWidth" class="input-calib" value="16.7">
+                <strong>Бажана ширина (мм):</strong>
+                <input type="number" step="0.1" id="realWidth" class="input-calib" value="17.9" title="Скільки міліметрів ви хочете отримати на папері">
             </div>
             <div>
-                <strong>Висота ряду (мм):</strong>
-                <input type="number" step="0.1" id="calibHeight" class="input-calib" value="30">
+                <strong>Бажана висота (мм):</strong>
+                <input type="number" step="0.1" id="realHeight" class="input-calib" value="30">
             </div>
         </div>
+
+        <div class="calibration-box">
+            <div style="flex: 1;">
+                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте лінію. Якщо вона НЕ 100 мм, впишіть її реальний розмір тут ➔
+            </div>
+            <div>
+                <input type="number" step="0.1" id="measuredLine" class="input-calib" value="100" style="width: 70px; font-weight: bold; background: #fff3e0 !important;"> мм
+            </div>
+            <button class="btn" id="btnPrintTest" style="background: #17a2b8; color: white;">📏 Друк лінії</button>
+        </div>
         
+        <br>
+        <button class="btn-clear" id="btnClear">🗑 Очистити все</button>
+
         <table>
             <thead>
                 <tr>
-                    <th style="width: 40px; text-align: center;" title="Порядковий номер модуля">#</th>
+                    <th style="width: 40px; text-align: center;">#</th>
                     <th style="width: 60px; text-align: center;">Ряд</th>
                     <th style="width: 80px;">Поз.</th>
                     <th>Назва лінії</th>
@@ -202,10 +195,16 @@
         
         <button class="btn btn-add" id="btnAdd">+ Додати лінію</button>
         <button class="btn btn-gen" id="btnGen">Сформувати наклейки</button>
-        <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати</button>
+        <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати наклейки</button>
     </div>
     
-    <div id="print-area"></div>
+    <div id="print-area">
+        <div class="print-calibration" id="printCalibBlock">
+            Тестова лінія (має бути рівно 100 мм)
+            <div class="test-line"></div>
+        </div>
+        <div id="labels-container"></div>
+    </div>
 </div>
 
 <script>
@@ -213,62 +212,62 @@ const DeviceTypes = {
     BLANK:  { label: '', class: 'type-blank' },
     LIGHT:  { label: 'Світло', class: 'type-light' },
     SOCKET: { label: 'Розетки', class: 'type-socket' },
-    HEAVY:  { label: 'Живлення', class: 'type-heavy' },
-    RCCB:   { label: 'ПЗВ/ Диф', class: 'type-rccb' },
+    HEAVY:  { label: 'Силове', class: 'type-heavy' },
+    RCCB:   { label: 'ПЗВ/Диф', class: 'type-rccb' },
     GEN:    { label: 'Генератор', class: 'type-gen' },
     NET:    { label: 'Iнтернет', class: 'type-net' },
     CLIMATE: { label: 'Клімат', class: 'type-climate' },
+    SECURITY: { label: 'Охорона', class: 'type-security' },
     SMART:   { label: 'Smart Home', class: 'type-smart' },
-    UPS:     { label: 'Інше', class: 'type-other' },
+    POWER:     { label: 'Живлення', class: 'type-power' },
     APPL:    { label: 'Техніка', class: 'type-appliances' }
-
 };
 
 const tableBody = document.getElementById('tableBody');
-const railLimit = document.getElementById('railLimit');
-const calibWidth = document.getElementById('calibWidth');
-const calibHeight = document.getElementById('calibHeight');
-const printArea = document.getElementById('print-area');
+const realWidth = document.getElementById('realWidth');
+const realHeight = document.getElementById('realHeight');
+const measuredLine = document.getElementById('measuredLine');
+const labelsContainer = document.getElementById('labels-container');
 const btnPrint = document.getElementById('btnPrint');
+const btnPrintTest = document.getElementById('btnPrintTest');
 
-// Завантаження калібрувань
-const savedWidth = localStorage.getItem('shield_v2_width') || '16.7';
-const savedHeight = localStorage.getItem('shield_v2_height') || '30';
+realWidth.value = localStorage.getItem('shield_real_w') || '17.9';
+realHeight.value = localStorage.getItem('shield_real_h') || '30';
+measuredLine.value = localStorage.getItem('shield_measured') || '100';
 
-calibWidth.value = savedWidth;
-calibHeight.value = savedHeight;
-document.documentElement.style.setProperty('--unit-w', savedWidth + 'mm');
-document.documentElement.style.setProperty('--unit-h', savedHeight + 'mm');
+function applyCalibration() {
+    let w = parseFloat(realWidth.value) || 17.9;
+    let h = parseFloat(realHeight.value) || 30;
+    let m = parseFloat(measuredLine.value) || 100;
+    let scale = 100 / m; 
 
-calibWidth.addEventListener('input', function() {
-    document.documentElement.style.setProperty('--unit-w', this.value + 'mm');
-    localStorage.setItem('shield_v2_width', this.value);
-});
+    document.documentElement.style.setProperty('--scale-factor', scale);
+    document.documentElement.style.setProperty('--real-w', w);
+    document.documentElement.style.setProperty('--real-h', h);
 
-calibHeight.addEventListener('input', function() {
-    document.documentElement.style.setProperty('--unit-h', this.value + 'mm');
-    localStorage.setItem('shield_v2_height', this.value);
-});
+    localStorage.setItem('shield_real_w', w);
+    localStorage.setItem('shield_real_h', h);
+    localStorage.setItem('shield_measured', m);
+}
 
-// Функція оновлення нумерації модулів у таблиці
+[realWidth, realHeight, measuredLine].forEach(input => input.addEventListener('input', applyCalibration));
+applyCalibration();
+
 function updateIndices() {
     let currentMod = 1;
     document.querySelectorAll('#tableBody tr').forEach(tr => {
         let p = parseInt(tr.querySelector('.row-phases').value) || 1;
-        let idxText = p > 1 ? `${currentMod}-${currentMod + p - 1}` : currentMod;
-        tr.querySelector('.mod-idx').innerText = idxText;
+        tr.querySelector('.mod-idx').innerText = p > 1 ? `${currentMod}-${currentMod + p - 1}` : currentMod;
         currentMod += p;
     });
 }
 
 function saveData() {
-    updateIndices(); // Оновлюємо нумерацію перед збереженням
+    updateIndices(); 
     const rows = document.querySelectorAll('#tableBody tr');
     const data = Array.from(rows).map(row => ({
-        r: row.querySelector('.row-num').value,
-        tag: row.querySelector('.row-tag').value,
-        n: row.querySelector('.row-name').value,
-        t: row.querySelector('.row-type').value,
+        r: row.querySelector('.row-num').value, tag: row.querySelector('.row-tag').value,
+        n: row.querySelector('.row-name').value, t: row.querySelector('.row-type').value,
         p: row.querySelector('.row-phases').value
     }));
     localStorage.setItem('shield_v2_data', JSON.stringify(data));
@@ -276,7 +275,14 @@ function saveData() {
 
 function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
     const tr = document.createElement('tr');
+    
     let typeOpts = Object.entries(DeviceTypes).map(([k, v]) => `<option value="${k}" ${type === k ? 'selected' : ''}>${v.label || '—'}</option>`).join('');
+    
+    // Якщо тип кастомний (зі свого імпорту), додаємо його як опцію
+    if (!DeviceTypes[type] && type !== 'BLANK' && type !== '') {
+        typeOpts += `<option value="${type}" selected>${type}</option>`;
+    }
+    
     let rowOpts = Array.from({length: 15}, (_, i) => `<option value="${i+1}" ${parseInt(rNum) === i+1 ? 'selected' : ''}>${i+1}</option>`).join('');
 
     tr.innerHTML = `
@@ -288,7 +294,6 @@ function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
         <td><select class="row-phases">${[1,2,3,4].map(v => `<option value="${v}" ${phases == v ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
         <td><button class="btn-del" title="Видалити">✕</button></td>
     `;
-
     tr.querySelectorAll('input, select').forEach(el => el.addEventListener('change', saveData));
     tr.querySelector('.btn-del').onclick = () => { tr.remove(); saveData(); };
     tableBody.appendChild(tr);
@@ -300,28 +305,63 @@ document.getElementById('btnToggleImport').onclick = () => {
     p.style.display = p.style.display === 'block' ? 'none' : 'block';
 };
 
+document.getElementById('btnExport').onclick = () => {
+    const rows = document.querySelectorAll('#tableBody tr');
+    if (rows.length === 0) return;
+    let csv = "Позначка,Назва,Ширина,Тип,Ряд\n";
+    rows.forEach(r => csv += `${r.querySelector('.row-tag').value.replace(/,/g,'')},${r.querySelector('.row-name').value.replace(/,/g,'')},${r.querySelector('.row-phases').value},${r.querySelector('.row-type').value},${r.querySelector('.row-num').value}\n`);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    link.download = "shield_labels.csv";
+    link.click();
+};
+
 document.getElementById('btnProcessImport').onclick = () => {
     const text = document.getElementById('importText').value.trim();
+    if (!text) return;
+    const [iTag, iName, iWidth, iType, iRow] = ['mTag','mName','mWidth','mType','mRow'].map(id => parseInt(document.getElementById(id).value));
+    
     text.split('\n').forEach(line => {
-        let cols = line.includes('|') ? line.split('|').map(c=>c.trim()).filter(c=>c!=='') : line.split(',').map(c=>c.trim());
-        if (cols.length >= 2) {
-            addRow(cols[4]||1, cols[0], cols[1], cols[3]||'BLANK', parseInt(cols[2])||1);
+        let clean = line.replace(/^\||\|$/g, '').trim();
+        if (!clean || clean.includes('---')) return; 
+        let cols = clean.includes('|') ? clean.split('|') : clean.split(/[\t,;]/);
+        cols = cols.map(c => c.trim());
+        if (cols.length > 0 && (cols[iTag] || cols[iName])) {
+            
+            let rawType = cols[iType] ? cols[iType] : '';
+            let typeKey = rawType.toUpperCase();
+            let finalType = 'BLANK';
+
+            if (rawType) {
+                if (DeviceTypes[typeKey]) {
+                    // Якщо ввели англійський ключ (напр. LIGHT)
+                    finalType = typeKey;
+                } else {
+                    // Якщо ввели українську назву (напр. Світло), шукаємо співпадіння
+                    let matchedKey = Object.keys(DeviceTypes).find(k => 
+                        DeviceTypes[k].label.toLowerCase() === rawType.toLowerCase()
+                    );
+                    // Якщо не знайшли ні того, ні іншого — зберігаємо як кастомний текст
+                    finalType = matchedKey ? matchedKey : rawType;
+                }
+            }
+
+            addRow(parseInt(cols[iRow])||1, cols[iTag]||'', cols[iName]||'', finalType, parseInt(cols[iWidth])||1);
         }
     });
     document.getElementById('import-panel').style.display = 'none';
+    document.getElementById('importText').value = '';
 };
 
 document.getElementById('btnGen').onclick = () => {
-    const limit = parseInt(railLimit.value);
+    const limit = parseInt(document.getElementById('railLimit').value);
     const rows = Array.from(document.querySelectorAll('#tableBody tr')).map(tr => ({
-        r: tr.querySelector('.row-num').value,
-        tag: tr.querySelector('.row-tag').value,
-        name: tr.querySelector('.row-name').value,
-        type: tr.querySelector('.row-type').value,
+        r: tr.querySelector('.row-num').value, tag: tr.querySelector('.row-tag').value,
+        name: tr.querySelector('.row-name').value, type: tr.querySelector('.row-type').value,
         p: parseInt(tr.querySelector('.row-phases').value)
     }));
 
-    printArea.innerHTML = '';
+    labelsContainer.innerHTML = '';
     btnPrint.style.display = 'inline-block';
 
     const grouped = {};
@@ -329,39 +369,39 @@ document.getElementById('btnGen').onclick = () => {
 
     let globalIdx = 1;
     Object.keys(grouped).sort((a,b)=>a-b).forEach(rNum => {
-        let rail = document.createElement('div');
-        rail.className = 'din-rail';
+        let rail = document.createElement('div'); rail.className = 'din-rail';
         let used = 0;
-
         grouped[rNum].forEach(item => {
             if (used + item.p > limit) {
-                printArea.appendChild(rail);
+                labelsContainer.appendChild(rail);
                 rail = document.createElement('div'); rail.className = 'din-rail';
                 used = 0;
             }
-            const label = document.createElement('div');
-            label.className = `label w-${item.p}`;
+            const label = document.createElement('div'); label.className = `label w-${item.p}`;
+            
+            // Визначаємо стиль і текст для шапки (якщо кастомний - стиль пустий, текст кастомний)
             const tInfo = DeviceTypes[item.type];
-            label.innerHTML = `<div class="t-bar ${tInfo.class}">${tInfo.label}</div>
+            const barClass = tInfo ? tInfo.class : 'type-blank';
+            const barLabel = tInfo ? tInfo.label : item.type; 
+
+            label.innerHTML = `<div class="t-bar ${barClass}">${barLabel}</div>
                 <div class="l-tag">${item.tag}</div><div class="l-name">${item.name}</div>
                 <div class="l-num">${item.p > 1 ? globalIdx+'-'+(globalIdx+item.p-1) : globalIdx}</div>`;
             rail.appendChild(label);
             used += item.p; globalIdx += item.p;
         });
-        printArea.appendChild(rail);
+        labelsContainer.appendChild(rail);
     });
 };
 
 document.getElementById('btnAdd').onclick = () => addRow();
-document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все? Дані будуть втрачені.')) { tableBody.innerHTML = ''; localStorage.clear(); updateIndices(); } };
-btnPrint.onclick = () => window.print();
+document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
+
+btnPrintTest.onclick = () => { document.body.classList.add('print-mode-test'); window.print(); document.body.classList.remove('print-mode-test'); };
+btnPrint.onclick = () => { document.body.classList.add('print-mode-labels'); window.print(); document.body.classList.remove('print-mode-labels'); };
 
 const savedData = localStorage.getItem('shield_v2_data');
-if (savedData) {
-    JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p));
-} else {
-    addRow(1, 'QS1', 'Ввідний', 'HEAVY', 3);
-}
+if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввідний рубильник', 'HEAVY', 3);
 </script>
 </body>
 </html>
