@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор маркування щита</title>
+    <title>Конструктор маркування щита PRO (Автокалібрування)</title>
     <style>
         :root {
             --background-primary: #ffffff;
@@ -113,8 +113,10 @@
             .ui-panel { display: none !important; } 
             .shield-wrapper { width: 100%; margin: 0; max-width: none; }
             .din-rail { page-break-inside: avoid; margin-bottom: 5mm; display: flex !important; } 
+            
             body.print-mode-test .print-calibration { display: block; }
             body.print-mode-test #labels-container { display: none !important; }
+            
             body.print-mode-labels .print-calibration { display: none !important; }
             body.print-mode-labels #labels-container { display: block; }
         }
@@ -126,7 +128,7 @@
     <div class="ui-panel">
         <div>
             <h3 style="margin-top: 0; display: inline-block;">⚡️ Конструктор маркування</h3>
-            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт даних</button>
+            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт</button>
             <button class="btn btn-export" id="btnExport">📤 Експорт у CSV</button>
         </div>
         
@@ -156,18 +158,18 @@
                 </select>
             </div>
             <div>
-                <strong>Ширина (мм):</strong>
+                <strong>Бажана ширина (мм):</strong>
                 <input type="number" step="0.1" id="realWidth" class="input-calib" value="17.9" title="Скільки міліметрів ви хочете отримати на папері">
             </div>
             <div>
-                <strong>Висота (мм):</strong>
+                <strong>Бажана висота (мм):</strong>
                 <input type="number" step="0.1" id="realHeight" class="input-calib" value="30">
             </div>
         </div>
 
         <div class="calibration-box">
             <div style="flex: 1;">
-                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте тестову лінію. Якщо вона НЕ 100 мм, впишіть її реальний розмір тут ➔
+                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте лінію. Якщо вона НЕ 100 мм, впишіть її реальний розмір тут ➔
             </div>
             <div>
                 <input type="number" step="0.1" id="measuredLine" class="input-calib" value="100" style="width: 70px; font-weight: bold; background: #fff3e0 !important;"> мм
@@ -193,7 +195,7 @@
             <tbody id="tableBody"></tbody>
         </table>
         
-        <button class="btn btn-add" id="btnAdd">+ Додати ряд</button>
+        <button class="btn btn-add" id="btnAdd">+ Додати лінію</button>
         <button class="btn btn-gen" id="btnGen">Сформувати наклейки</button>
         <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати наклейки</button>
     </div>
@@ -278,7 +280,6 @@ function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
     
     let typeOpts = Object.entries(DeviceTypes).map(([k, v]) => `<option value="${k}" ${type === k ? 'selected' : ''}>${v.label || '—'}</option>`).join('');
     
-    // Якщо тип кастомний (зі свого імпорту), додаємо його як опцію
     if (!DeviceTypes[type] && type !== 'BLANK' && type !== '') {
         typeOpts += `<option value="${type}" selected>${type}</option>`;
     }
@@ -334,14 +335,11 @@ document.getElementById('btnProcessImport').onclick = () => {
 
             if (rawType) {
                 if (DeviceTypes[typeKey]) {
-                    // Якщо ввели англійський ключ (напр. LIGHT)
                     finalType = typeKey;
                 } else {
-                    // Якщо ввели українську назву (напр. Світло), шукаємо співпадіння
                     let matchedKey = Object.keys(DeviceTypes).find(k => 
                         DeviceTypes[k].label.toLowerCase() === rawType.toLowerCase()
                     );
-                    // Якщо не знайшли ні того, ні іншого — зберігаємо як кастомний текст
                     finalType = matchedKey ? matchedKey : rawType;
                 }
             }
@@ -379,7 +377,6 @@ document.getElementById('btnGen').onclick = () => {
             }
             const label = document.createElement('div'); label.className = `label w-${item.p}`;
             
-            // Визначаємо стиль і текст для шапки (якщо кастомний - стиль пустий, текст кастомний)
             const tInfo = DeviceTypes[item.type];
             const barClass = tInfo ? tInfo.class : 'type-blank';
             const barLabel = tInfo ? tInfo.label : item.type; 
@@ -397,17 +394,28 @@ document.getElementById('btnGen').onclick = () => {
 document.getElementById('btnAdd').onclick = () => addRow();
 document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
 
-// ВИПРАВЛЕНА ЛОГІКА ДРУКУ: використовуємо setTimeout, щоб браузер встиг сформувати вікно
+// НОВА НАДІЙНА ЛОГІКА ДРУКУ: використовуємо події браузера
+
+let currentPrintMode = '';
+
+// Коли браузер ЗАКРИВАЄ вікно друку (незалежно від того, надрукували чи скасували)
+window.addEventListener('afterprint', () => {
+    if (currentPrintMode) {
+        document.body.classList.remove(currentPrintMode);
+        currentPrintMode = '';
+    }
+});
+
 btnPrintTest.onclick = () => { 
-    document.body.classList.add('print-mode-test'); 
+    currentPrintMode = 'print-mode-test';
+    document.body.classList.add(currentPrintMode); 
     window.print(); 
-    setTimeout(() => { document.body.classList.remove('print-mode-test'); }, 1000); 
 };
 
 btnPrint.onclick = () => { 
-    document.body.classList.add('print-mode-labels'); 
+    currentPrintMode = 'print-mode-labels';
+    document.body.classList.add(currentPrintMode); 
     window.print(); 
-    setTimeout(() => { document.body.classList.remove('print-mode-labels'); }, 1000); 
 };
 
 const savedData = localStorage.getItem('shield_v2_data');
