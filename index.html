@@ -17,17 +17,17 @@
             --real-w: 17.9;
             --real-h: 30;
             
-            --mm-to-pt: 2.83465pt;
-            --unit-w: calc(var(--real-w) * var(--scale-factor) * var(--mm-to-pt));
-            --unit-h: calc(var(--real-h) * var(--scale-factor) * var(--mm-to-pt));
+            --mm-to-px: 3.78px;
+            --unit-w: calc(var(--real-w) * var(--scale-factor) * var(--mm-to-px)); 
+            --unit-h: calc(var(--real-h) * var(--scale-factor) * var(--mm-to-px));
         }
 
         @page {
             size: A4 landscape; 
-            margin-top: 14pt;
-            margin-left: 14pt;
-            margin-right: 14pt;
-            margin-bottom: 14pt;
+            margin-top: 5mm;
+            margin-left: 5mm;
+            margin-right: 5mm;
+            margin-bottom: 5mm;
         }
 
         body {
@@ -154,12 +154,12 @@
         }
 
         .din-rail { 
-            display: flex !important;
-            flex-wrap: nowrap !important;
+            display: flex; 
+            flex-wrap: nowrap; 
             border: 0.1mm solid #000; 
             background: white; 
             margin-bottom: 0; /*відступи між рядмаи наклейок*/
-            width: max-content !important; 
+            width: max-content; 
         }
 
         .label { 
@@ -203,14 +203,13 @@
         .type-appliances { background: #7986cb; color: #fff; }
 
         @media print { 
-            body { 
+            html, body { 
                 width: 297mm;
                 height: 210mm;
                 zoom: 100% !important;
                 background: white; 
                 margin: 5mm; 
-                padding: 0;
-            }
+                padding: 0; }
             .ui-panel { display: none !important; } 
             .test-line-component { padding: 0; margin: 0; }
         }
@@ -333,7 +332,6 @@ function applyCalibration() {
     let m = parseFloat(measuredLine.value) || 100;
     let scale = 100 / m; 
 
-    // Встановлюємо змінні в документ
     document.documentElement.style.setProperty('--scale-factor', scale);
     document.documentElement.style.setProperty('--real-w', w);
     document.documentElement.style.setProperty('--real-h', h);
@@ -341,13 +339,6 @@ function applyCalibration() {
     localStorage.setItem('shield_real_w', w);
     localStorage.setItem('shield_real_h', h);
     localStorage.setItem('shield_measured', m);
-
-    // ФІКС ДЛЯ МОБІЛЬНИХ: примусове перемальовування
-    if (labelsContainer) {
-        labelsContainer.style.display = 'none';
-        labelsContainer.offsetHeight; // Виклик перерахунку (reflow)
-        labelsContainer.style.display = 'block';
-    }
 }
 
 [realWidth, realHeight, measuredLine].forEach(input => input.addEventListener('input', applyCalibration));
@@ -553,10 +544,6 @@ document.getElementById('btnAdd').onclick = () => {
         // Якщо таблиця порожня, додаємо звичайний пустий рядок
         addRow();
     }
-};
-
-window.onbeforeprint = () => {
-    applyCalibration(); // Ще раз перевіряємо масштаб перед формуванням черги друку
 };
 
 document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
