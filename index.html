@@ -497,7 +497,7 @@ document.getElementById('btnClear').onclick = () => { if(confirm('Очистит
 btnPrint.onclick = () => { window.print(); };
 
 const savedData = localStorage.getItem('shield_v2_data');
-if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввідний рубильник', 'HEAVY', 3);
+if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввідний автомат', 'HEAVY', 3);
 </script>
 </body>
 </html>
