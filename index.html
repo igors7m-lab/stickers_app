@@ -491,13 +491,43 @@ document.getElementById('btnGen').onclick = () => {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 };
 
-document.getElementById('btnAdd').onclick = () => addRow();
+document.getElementById('btnAdd').onclick = () => {
+    const rows = tableBody.querySelectorAll('tr');
+    
+    if (rows.length > 0) {
+        // Беремо останній рядок
+        const lastRow = rows[rows.length - 1];
+        
+        // Зчитуємо значення з полів останнього рядка
+        const lastRowNum = lastRow.querySelector('.row-num').value;
+        const lastTag = lastRow.querySelector('.row-tag').value;
+        const lastName = ""; // Назву зазвичай краще залишати пустою для нового модуля
+        const lastType = lastRow.querySelector('.row-type').value;
+        const lastPhases = lastRow.querySelector('.row-phases').value;
+
+        // Спроба автоматично збільшити номер у позначці (наприклад, QF1 -> QF2)
+        let nextTag = lastTag;
+        const tagMatch = lastTag.match(/^(.*?)(\{0,1\}\d+)$/);
+        if (tagMatch) {
+            const prefix = tagMatch[1];
+            const number = parseInt(tagMatch[2]);
+            nextTag = prefix + (number + 1);
+        }
+
+        // Додаємо новий рядок із підтягнутими значеннями
+        addRow(lastRowNum, nextTag, lastName, lastType, lastPhases);
+    } else {
+        // Якщо таблиця порожня, додаємо звичайний пустий рядок
+        addRow();
+    }
+};
+
 document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
 
 btnPrint.onclick = () => { window.print(); };
 
 const savedData = localStorage.getItem('shield_v2_data');
-if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввідний автомат', 'HEAVY', 3);
+if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввід живлення ', 'HEAVY', 3);
 </script>
 </body>
 </html>
