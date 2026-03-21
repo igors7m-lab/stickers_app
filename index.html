@@ -225,9 +225,9 @@
                 <strong>Вкажіть колонки даних:</strong>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; font-size: 0.85em;">
-                <div>Поз.:<br><select id="mTag" class="input-calib" style="width: 50px;"><option value="0" selected>1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select></div>
+                <div>Позначка:<br><select id="mTag" class="input-calib" style="width: 50px;"><option value="0" selected>1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select></div>
                 <div>Назва:<br><select id="mName" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1" selected>2</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select></div>
-                <div>Шир.:<br><select id="mWidth" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2" selected>3</option><option value="3">4</option><option value="4">5</option></select></div>
+                <div>Ширина:<br><select id="mWidth" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2" selected>3</option><option value="3">4</option><option value="4">5</option></select></div>
                 <div>Тип:<br><select id="mType" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3" selected>4</option><option value="4">5</option></select></div>
                 <div>Ряд:<br><select id="mRow" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4" selected>5</option></select></div>
             </div>
@@ -273,10 +273,10 @@
                 <tr>
                     <th style="width: 40px; text-align: center;">#</th>
                     <th style="width: 60px; text-align: center;">Ряд</th>
-                    <th style="width: 80px;">Поз.</th>
+                    <th style="width: 80px;">Позначка</th>
                     <th>Назва лінії</th>
                     <th style="width: 120px;">Тип</th>
-                    <th style="width: 60px; text-align: center;">Шир.</th>
+                    <th style="width: 60px; text-align: center;">Ширина</th>
                     <th style="width: 40px;"></th>
                 </tr>
             </thead>
@@ -404,33 +404,52 @@ document.getElementById('btnExport').onclick = () => {
 document.getElementById('btnProcessImport').onclick = () => {
     const text = document.getElementById('importText').value.trim();
     if (!text) return;
-    const [iTag, iName, iWidth, iType, iRow] = ['mTag','mName','mWidth','mType','mRow'].map(id => parseInt(document.getElementById(id).value));
+    
+    // Отримуємо індекси колонок з налаштувань інтерфейсу
+    const [iTag, iName, iWidth, iType, iRow] = ['mTag','mName','mWidth','mType','mRow']
+        .map(id => parseInt(document.getElementById(id).value));
     
     text.split('\n').forEach(line => {
+        // Очищення рядка від символів таблиць Markdown
         let clean = line.replace(/^\||\|$/g, '').trim();
         if (!clean || clean.includes('---')) return; 
+        
         let cols = clean.includes('|') ? clean.split('|') : clean.split(/[\t,;]/);
         cols = cols.map(c => c.trim());
+
         if (cols.length > 0 && (cols[iTag] || cols[iName])) {
-            
             let rawType = cols[iType] ? cols[iType] : '';
-            let typeKey = rawType.toUpperCase();
-            let finalType = 'BLANK';
+            let finalType = 'BLANK'; // Значення за замовчуванням (пустий формат)
+            let customTypeName = rawType; // Зберігаємо оригінальний текст для відображення
 
             if (rawType) {
-                if (DeviceTypes[typeKey]) {
-                    finalType = typeKey;
+                const searchStr = rawType.toLowerCase();
+
+                // 1. Шукаємо збіг серед встановлених типів (по ключу або по мітці)
+                const foundKey = Object.keys(DeviceTypes).find(key => 
+                    key.toLowerCase() === searchStr || 
+                    DeviceTypes[key].label.toLowerCase() === searchStr
+                );
+
+                if (foundKey) {
+                    finalType = foundKey;
                 } else {
-                    let matchedKey = Object.keys(DeviceTypes).find(k => 
-                        DeviceTypes[k].label.toLowerCase() === rawType.toLowerCase()
-                    );
-                    finalType = matchedKey ? matchedKey : rawType;
+                    // 2. Якщо збігу немає, використовуємо BLANK (білий), 
+                    // але передаємо текст як назву типу
+                    finalType = rawType; 
                 }
             }
 
-            addRow(parseInt(cols[iRow])||1, cols[iTag]||'', cols[iName]||'', finalType, parseInt(cols[iWidth])||1);
+            addRow(
+                parseInt(cols[iRow]) || 1, 
+                cols[iTag] || '', 
+                cols[iName] || '', 
+                finalType, 
+                parseInt(cols[iWidth]) || 1
+            );
         }
     });
+    
     document.getElementById('import-panel').style.display = 'none';
     document.getElementById('importText').value = '';
 };
