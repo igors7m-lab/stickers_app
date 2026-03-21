@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор маркування щита PRO (Автокалібрування)</title>
+    <title>Конструктор маркування щита</title>
     <style>
         :root {
             --background-primary: #ffffff;
@@ -23,7 +23,10 @@
 
         @page {
             size: A4 landscape; 
-            margin: 0;
+            margin-top: 5mm;
+            margin-left: 5mm;
+            margin-right: 5mm;
+            margin-bottom: 5mm;
         }
 
         body {
@@ -36,15 +39,72 @@
         }
 
         .shield-wrapper { max-width: 1150px; margin: 0 auto; }
-        .ui-panel { background: var(--background-primary-alt); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .ui-panel { 
+            background: var(--background-primary-alt); 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
         
-        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; border: 1px solid var(--background-modifier-border); background: white; }
-        th { padding: 8px; border: 1px solid var(--background-modifier-border); text-align: left; color: var(--text-muted); background: var(--background-secondary); font-size: 0.85em; text-transform: uppercase; }
-        td { padding: 0; border: 1px solid var(--background-modifier-border); vertical-align: middle; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 10px 0; 
+            font-size: 0.9em; 
+            border: 1px solid var(--background-modifier-border); 
+            background: white; 
+        }
+
+        th { 
+            padding: 8px; 
+            border: 1px solid var(--background-modifier-border); 
+            text-align: left; 
+            color: var(--text-muted); 
+            background: var(--background-secondary); 
+            font-size: 0.85em; 
+            text-transform: uppercase; 
+        }
+
+        td { 
+            padding: 0; 
+            border: 1px solid var(--background-modifier-border); 
+            vertical-align: middle; 
+        }
         
-        input, select { width: 100%; height: 36px; padding: 0 8px; margin: 0; border: none !important; background: transparent !important; color: var(--text-normal); font-size: 0.95em; outline: none !important; box-sizing: border-box; }
-        .input-calib { border: 1px solid #ccc !important; background: white !important; width: 70px; display: inline-block; text-align: center; }
-        .mod-idx { font-size: 0.85em; color: var(--text-muted); text-align: center; font-weight: bold; display: block; }
+        input, select { 
+            width: 100%; 
+            height: 36px; 
+            padding: 0 8px; 
+            margin: 0; 
+            border: none !important; 
+            background: white !important; 
+            color: var(--text-normal); 
+            font-size: 0.95em; 
+            outline: none !important; 
+            box-sizing: border-box; 
+        }
+
+        .input-calib {
+            width: 50px;
+            min-width: 60px;
+            height: 36px;
+            padding: 2px 8px;
+            border: 1px solid #ccc !important;
+            background: white !important;
+            font-size: 0.9em;
+            color: var(--text-normal);
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+            
+        .mod-idx { 
+            font-size: 0.85em; 
+            color: var(--text-muted); 
+            text-align: center; 
+            font-weight: bold; 
+            display: block; 
+        }
 
         .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.2s; }
         .btn-add { background: #17a2b8; color: white; }
@@ -58,15 +118,64 @@
         #import-panel { display: none; background: #fff; border: 1px solid var(--background-modifier-border); padding: 15px; border-radius: 6px; margin-bottom: 15px; margin-top: 15px; clear: both; }
         #import-panel textarea { width: 100%; height: 120px; font-family: monospace; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ccc !important; background: #fafafa !important; }
 
-        .settings-row { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; background: #e9ecef; padding: 10px; border-radius: 6px; flex-wrap: wrap; }
-        .calibration-box { background: #f6f5f5; padding: 10px; border-radius: 6px; border: 1px solid #e9ecef; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .settings-row { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; background: #e9ecef; padding: 10px; border-radius: 10px; flex-wrap: wrap; }
+        .calibration-box { background: #f6f5f5; padding: 10px; border-radius: 10px; border: 1px solid #e9ecef; display: flex; align-items: center; flex-wrap: wrap; gap: 15px; }
 
-        .print-calibration { display: none; margin-bottom: 3mm; font-size: 7pt; color: black; line-height: 1.1; }
-        .test-line { width: calc(100mm * var(--scale-factor)); height: 2mm; border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black; margin-top: 1mm; position: relative; }
-        .test-line::after { content: "100 мм"; position: absolute; top: 0.5mm; left: 50%; transform: translateX(-50%); font-size: 6pt; background: white; padding: 0 2px; }
+        .test-line-box {
+            width: 100mm; 
+            height: 5mm; 
+            border-bottom: 0.4mm solid black;
+            border-left: 0.4mm solid black;
+            border-right: 0.4mm solid black;
+            position: relative;
+            box-sizing: content-box;
+}
 
-        .din-rail { display: flex; flex-wrap: nowrap; border: 0.1mm solid #000; background: white; margin-bottom: 5mm; width: max-content; }
-        .label { box-sizing: border-box; border-right: 0.1mm solid #000; height: var(--unit-h); position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: white; color: black; overflow: hidden; flex-shrink: 0; }
+        .test-line-box {
+            width: calc(100mm * var(--scale-factor));
+            height: 2mm; 
+            border-bottom: 0.2mm solid black;
+            border-left: 0.2mm solid black;
+            border-right: 0.2mm solid black;
+            position: relative;
+            box-sizing: content-box;
+        }
+
+        .test-line-box::after {
+            content: "← 100 mm →";
+            position: absolute;
+            bottom: 2mm;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 7pt;
+            color: #4c4b4b;
+        }
+
+        .din-rail { 
+            display: flex; 
+            flex-wrap: nowrap; 
+            border: 0.1mm solid #000; 
+            background: white; 
+            margin-bottom: 0; /*відступи між рядмаи наклейок*/
+            width: max-content; 
+        }
+
+        .label { 
+            box-sizing: border-box; 
+            border-right: 0.1mm solid #000; 
+            height: var(--unit-h); 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center; 
+            background: white; 
+            color: black; 
+            overflow: hidden; 
+            flex-shrink: 0; 
+        }
+
         .label:last-child { border-right: none; }
         
         .w-1 { width: var(--unit-w); min-width: var(--unit-w); max-width: var(--unit-w); } 
@@ -93,14 +202,11 @@
         .type-appliances { background: #7986cb; color: #fff; }
 
         @media print { 
-            body { background: white; margin: 0; padding: 5mm; } 
+            body { background: white; 
+                margin: 5mm; 
+                padding: 0; }
             .ui-panel { display: none !important; } 
-            .shield-wrapper { width: 100%; margin: 0; max-width: none; }
-            .din-rail { page-break-inside: avoid; margin-bottom: 5mm; display: flex !important; } 
-            body.print-mode-test .print-calibration { display: block; }
-            body.print-mode-test #labels-container { display: none !important; }
-            body.print-mode-labels .print-calibration { display: none !important; }
-            body.print-mode-labels #labels-container { display: block; }
+            .test-line-component { padding: 0; margin: 0; }
         }
     </style>
 </head>
@@ -110,7 +216,7 @@
     <div class="ui-panel">
         <div>
             <h3 style="margin-top: 0; display: inline-block;">⚡️ Конструктор маркування</h3>
-            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт</button>
+            <button class="btn btn-import" id="btnToggleImport">📥 Імпорт даних</button>
             <button class="btn btn-export" id="btnExport">📤 Експорт у CSV</button>
         </div>
         
@@ -125,14 +231,14 @@
                 <div>Тип:<br><select id="mType" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3" selected>4</option><option value="4">5</option></select></div>
                 <div>Ряд:<br><select id="mRow" class="input-calib" style="width: 50px;"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option><option value="4" selected>5</option></select></div>
             </div>
-            <textarea id="importText" placeholder="Вставте текст з Excel..."></textarea>
+            <textarea id="importText" placeholder="Вставте текст у вигляді CSV або Markdown text..."></textarea>
             <button class="btn btn-add" id="btnProcessImport" style="width: 100%;">Обробити дані</button>
         </div>
 
         <div class="settings-row">
             <div>
                 Модулів на рейку:
-                <select id="railLimit" style="width: auto; border: 1px solid #ccc !important; padding: 2px;">
+                <select id="railLimit" style="width: auto; border: 1px solid #393939 !important; padding: 2px;">
                     <option value="12" selected>12</option>
                     <option value="18">18</option>
                     <option value="24">24</option>
@@ -140,23 +246,23 @@
                 </select>
             </div>
             <div>
-                <strong>Бажана ширина (мм):</strong>
+                <strong>Ширина (мм):</strong>
                 <input type="number" step="0.1" id="realWidth" class="input-calib" value="17.9" title="Скільки міліметрів ви хочете отримати на папері">
             </div>
             <div>
-                <strong>Бажана висота (мм):</strong>
+                <strong>Висота (мм):</strong>
                 <input type="number" step="0.1" id="realHeight" class="input-calib" value="30">
             </div>
         </div>
 
         <div class="calibration-box">
             <div style="flex: 1;">
-                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте лінію. Якщо вона НЕ 100 мм, впишіть її реальний розмір тут ➔
+                <strong>⚙️ Коригування принтера:</strong> Роздрукуйте тестову лінію. Якщо на папері вона НЕ 100 мм, впишіть її реальний розмір тут ➔
             </div>
             <div>
-                <input type="number" step="0.1" id="measuredLine" class="input-calib" value="100" style="width: 70px; font-weight: bold; background: #fff3e0 !important;"> мм
+                <input type="number" step="0.1" id="measuredLine" class="input-calib" value="100" style="width: 70px; font-weight: bold; background: #ffffff !important;"> мм
             </div>
-            <button class="btn" id="btnPrintTest" style="background: #17a2b8; color: white;">📏 Друк лінії</button>
+            <button class="btn" id="btnGenTest" style="background: #17a2b8; color: white;">📏 Сформувати тестову лінію</button>
         </div>
         
         <br>
@@ -177,16 +283,12 @@
             <tbody id="tableBody"></tbody>
         </table>
         
-        <button class="btn btn-add" id="btnAdd">+ Додати лінію</button>
+        <button class="btn btn-add" id="btnAdd">+ Додати модуль</button>
         <button class="btn btn-gen" id="btnGen">Сформувати наклейки</button>
-        <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати наклейки</button>
+        <button class="btn btn-print" id="btnPrint">🖨 Роздрукувати</button>
     </div>
     
     <div id="print-area">
-        <div class="print-calibration" id="printCalibBlock">
-            Тестова лінія (має бути рівно 100 мм)
-            <div class="test-line"></div>
-        </div>
         <div id="labels-container"></div>
     </div>
 </div>
@@ -213,7 +315,7 @@ const realHeight = document.getElementById('realHeight');
 const measuredLine = document.getElementById('measuredLine');
 const labelsContainer = document.getElementById('labels-container');
 const btnPrint = document.getElementById('btnPrint');
-const btnPrintTest = document.getElementById('btnPrintTest');
+const btnGenTest = document.getElementById('btnGenTest');
 
 realWidth.value = localStorage.getItem('shield_real_w') || '17.9';
 realHeight.value = localStorage.getItem('shield_real_h') || '30';
@@ -259,6 +361,7 @@ function saveData() {
 
 function addRow(rNum = 1, tag = '', name = '', type = 'BLANK', phases = 1) {
     const tr = document.createElement('tr');
+    
     let typeOpts = Object.entries(DeviceTypes).map(([k, v]) => `<option value="${k}" ${type === k ? 'selected' : ''}>${v.label || '—'}</option>`).join('');
     
     if (!DeviceTypes[type] && type !== 'BLANK' && type !== '') {
@@ -309,6 +412,7 @@ document.getElementById('btnProcessImport').onclick = () => {
         let cols = clean.includes('|') ? clean.split('|') : clean.split(/[\t,;]/);
         cols = cols.map(c => c.trim());
         if (cols.length > 0 && (cols[iTag] || cols[iName])) {
+            
             let rawType = cols[iType] ? cols[iType] : '';
             let typeKey = rawType.toUpperCase();
             let finalType = 'BLANK';
@@ -323,6 +427,7 @@ document.getElementById('btnProcessImport').onclick = () => {
                     finalType = matchedKey ? matchedKey : rawType;
                 }
             }
+
             addRow(parseInt(cols[iRow])||1, cols[iTag]||'', cols[iName]||'', finalType, parseInt(cols[iWidth])||1);
         }
     });
@@ -330,6 +435,20 @@ document.getElementById('btnProcessImport').onclick = () => {
     document.getElementById('importText').value = '';
 };
 
+// --- ФОРМУВАННЯ ТЕСТОВОЇ ЛІНІЇ (ЕТАЛОН 100%) ---
+btnGenTest.onclick = () => {
+    labelsContainer.innerHTML = `
+        <div class="test-line-component">
+            <div style="font-size: 8pt; color: #666; margin-bottom: 5mm;">
+            </div>
+            <div class="test-line-box"></div>
+        </div>
+    `;
+    btnPrint.style.display = 'inline-block';
+    labelsContainer.scrollIntoView({ behavior: 'smooth' });
+};
+
+// --- ФОРМУВАННЯ НАКЛЕЙОК ---
 document.getElementById('btnGen').onclick = () => {
     const limit = parseInt(document.getElementById('railLimit').value);
     const rows = Array.from(document.querySelectorAll('#tableBody tr')).map(tr => ({
@@ -355,6 +474,7 @@ document.getElementById('btnGen').onclick = () => {
                 used = 0;
             }
             const label = document.createElement('div'); label.className = `label w-${item.p}`;
+            
             const tInfo = DeviceTypes[item.type];
             const barClass = tInfo ? tInfo.class : 'type-blank';
             const barLabel = tInfo ? tInfo.label : item.type; 
@@ -367,48 +487,14 @@ document.getElementById('btnGen').onclick = () => {
         });
         labelsContainer.appendChild(rail);
     });
+    
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 };
 
 document.getElementById('btnAdd').onclick = () => addRow();
 document.getElementById('btnClear').onclick = () => { if(confirm('Очистити все?')) { tableBody.innerHTML = ''; localStorage.removeItem('shield_v2_data'); updateIndices(); } };
 
-// --- БРОНЕБІЙНА ЛОГІКА ДРУКУ ДЛЯ SAFARI І CHROME ---
-let currentPrintMode = '';
-
-function clearPrintMode() {
-    if (currentPrintMode) {
-        document.body.classList.remove(currentPrintMode);
-        currentPrintMode = '';
-    }
-}
-
-// 1. Стандартний обробник (Chrome, Firefox, сучасний Edge)
-window.addEventListener('afterprint', clearPrintMode);
-
-// 2. Бронебійний обробник для Safari (через matchMedia)
-const mediaQueryList = window.matchMedia('print');
-if (mediaQueryList.addEventListener) {
-    mediaQueryList.addEventListener('change', function(mql) {
-        if (!mql.matches) clearPrintMode();
-    });
-} else if (mediaQueryList.addListener) { // Старі версії Safari
-    mediaQueryList.addListener(function(mql) {
-        if (!mql.matches) clearPrintMode();
-    });
-}
-
-btnPrintTest.onclick = () => { 
-    currentPrintMode = 'print-mode-test';
-    document.body.classList.add(currentPrintMode); 
-    // Мікрозатримка дає Safari час намалювати CSS перед блокуванням вікна
-    setTimeout(() => window.print(), 100); 
-};
-
-btnPrint.onclick = () => { 
-    currentPrintMode = 'print-mode-labels';
-    document.body.classList.add(currentPrintMode); 
-    setTimeout(() => window.print(), 100); 
-};
+btnPrint.onclick = () => { window.print(); };
 
 const savedData = localStorage.getItem('shield_v2_data');
 if (savedData) JSON.parse(savedData).forEach(d => addRow(d.r, d.tag, d.n, d.t, d.p)); else addRow(1, 'QS1', 'Ввідний рубильник', 'HEAVY', 3);
