@@ -17,8 +17,9 @@
             --real-w: 17.9;
             --real-h: 30;
             
-            --unit-w: calc(var(--real-w) * var(--scale-factor) * 1mm); 
-            --unit-h: calc(var(--real-h) * var(--scale-factor) * 1mm);
+            --mm-to-px: 3.78px;
+            --unit-w: calc(var(--real-w) * var(--scale-factor) * var(--mm-to-px)); 
+            --unit-h: calc(var(--real-h) * var(--scale-factor) * var(--mm-to-px));
         }
 
         @page {
@@ -202,7 +203,11 @@
         .type-appliances { background: #7986cb; color: #fff; }
 
         @media print { 
-            body { background: white; 
+            html, body { 
+                width: 297mm;
+                height: 210mm;
+                zoom: 100% !important;
+                background: white; 
                 margin: 5mm; 
                 padding: 0; }
             .ui-panel { display: none !important; } 
@@ -325,17 +330,23 @@ function applyCalibration() {
     let w = parseFloat(realWidth.value) || 17.9;
     let h = parseFloat(realHeight.value) || 30;
     let m = parseFloat(measuredLine.value) || 100;
+    
+    // Розраховуємо чистий коефіцієнт
     let scale = 100 / m; 
 
-    document.documentElement.style.setProperty('--scale-factor', scale);
-    document.documentElement.style.setProperty('--real-w', w);
-    document.documentElement.style.setProperty('--real-h', h);
+    document.documentElement.style.setProperty('--scale-factor', scale.toString());
+    document.documentElement.style.setProperty('--real-w', w.toString());
+    document.documentElement.style.setProperty('--real-h', h.toString());
 
     localStorage.setItem('shield_real_w', w);
     localStorage.setItem('shield_real_h', h);
     localStorage.setItem('shield_measured', m);
+    
+    // Трюк для мобільних: примусове оновлення лейауту
+    labelsContainer.style.display = 'none';
+    labelsContainer.offsetHeight; // force reflow
+    labelsContainer.style.display = 'block';
 }
-
 [realWidth, realHeight, measuredLine].forEach(input => input.addEventListener('input', applyCalibration));
 applyCalibration();
 
