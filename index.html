@@ -1444,7 +1444,7 @@
                     const widthMm = item.p * realW;
                     if (usedInRow + item.p > limit) {
                         currentX = 10;
-                        currentY += realH + 5;
+                        currentY += realH + 0;
                         usedInRow = 0;
                     }
                     svgContent += generateLabelSVG(item, currentX, currentY, widthMm, realH, globalIdx);
